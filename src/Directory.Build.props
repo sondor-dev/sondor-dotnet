@@ -14,6 +14,7 @@
     <RepositoryUrl>https://github.com/sondor-dev/sondor-dotnet</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageIcon>sondor-technology-logo.jpg</PackageIcon>
 
     <!-- Symbols and source link, so a consumer can step into the package. -->
     <IncludeSymbols>true</IncludeSymbols>
@@ -38,6 +39,11 @@
   <ItemGroup>
     <AdditionalFiles Include="PublicAPI.Shipped.txt" />
     <AdditionalFiles Include="PublicAPI.Unshipped.txt" />
+  </ItemGroup>
+
+  <!-- The logo shown next to every package on nuget.org (JPEG, square, under the 1 MB limit). -->
+  <ItemGroup>
+    <None Include="$(MSBuildThisFileDirectory)../assets/sondor-technology-logo.jpg" Pack="true" PackagePath="\" Visible="false" />
   </ItemGroup>
 
   <!-- Each package's README is shown on nuget.org. -->

@@ -47,4 +47,5 @@ Issues and pull requests are welcome; read [CONTRIBUTING.md](CONTRIBUTING.md) fi
 
 ## Licence
 
-[MIT](LICENSE).
+[MIT](LICENSE). The licence covers the code. The Sondor name and logo (`assets/`) are not part of it: you may use them to say that you
+use these packages, but not to suggest that a fork or a derived product is the official one.
