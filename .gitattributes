@@ -3,3 +3,4 @@
 *.cs text diff=csharp
 *.png binary
 *.snk binary
+*.jpg binary
