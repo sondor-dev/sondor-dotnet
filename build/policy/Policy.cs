@@ -46,8 +46,13 @@ await SyncFeature(report, gh, "Dependabot alerts", $"repos/{repo}/vulnerability-
 var actions = Load("actions.json");
 foreach (var (name, body) in actions.AsObject())
 {
-    await Sync(report, gh, $"actions: {name}", $"repos/{repo}/actions/{name}", HttpMethod.Put, body!);
+    // "permissions" is the base resource; the others are sub-resources of it (…/actions/permissions/workflow).
+    var path = name == "permissions" ? $"repos/{repo}/actions/permissions" : $"repos/{repo}/actions/permissions/{name}";
+    await Sync(report, gh, $"actions: {name}", path, HttpMethod.Put, body!);
 }
+
+// Code scanning runs from .github/workflows/codeql.yml, so GitHub's "default setup" must be off (it blocks that workflow).
+await Sync(report, gh, "code scanning default setup", $"repos/{repo}/code-scanning/default-setup", HttpMethod.Patch, Load("code-scanning.json"));
 
 // Rulesets.
 var existing = (await gh.Get($"repos/{repo}/rulesets"))?.AsArray() ?? [];
@@ -178,7 +183,10 @@ internal sealed class GitHub(string command, string? prefix)
         {
             // 404: the feature is off. 409: the setting does not apply in the current mode (selected-actions is
             // unavailable until allowed actions is "selected"). Either way the wanted state is not in place.
-            if (result.Error.Contains("HTTP 404", StringComparison.Ordinal) || result.Error.Contains("HTTP 409", StringComparison.Ordinal))
+            // gh puts the error body on stdout and a one-line summary on stderr; either can carry the status.
+            var text = result.Output + result.Error;
+            string[] markers = ["HTTP 404", "HTTP 409", "\"status\":\"404\"", "\"status\":\"409\""];
+            if (markers.Any(marker => text.Contains(marker, StringComparison.Ordinal)))
             {
                 return null;
             }

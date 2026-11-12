@@ -1,7 +1,8 @@
 {
   "permissions": {
     "enabled": true,
-    "allowed_actions": "selected"
+    "allowed_actions": "selected",
+    "sha_pinning_required": true
   },
   "selected-actions": {
     "github_owned_allowed": true,
