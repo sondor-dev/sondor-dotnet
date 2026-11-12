@@ -61,6 +61,11 @@ jobs:
           dotnet test Sondor.slnx --configuration Release --no-build
           --collect:"XPlat Code Coverage" --results-directory artifacts/test-results
 
+      # Every package is held to the minimum on its own, so a well-covered package cannot hide a thin one.
+      - name: Check coverage
+        if: steps.projects.outputs.found == 'true' && matrix.os == 'ubuntu-latest'
+        run: bash build/check-coverage.sh artifacts/test-results 90 80
+
       # Packing on every run catches a broken package (missing README, API break against the last release) before a tag does.
       - name: Pack
         if: steps.projects.outputs.found == 'true' && matrix.os == 'ubuntu-latest'

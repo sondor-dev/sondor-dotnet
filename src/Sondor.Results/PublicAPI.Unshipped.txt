@@ -1,0 +1,76 @@
+#nullable enable
+override Sondor.Results.Error.GetHashCode() -> int
+override Sondor.Results.Result.Equals(object? obj) -> bool
+override Sondor.Results.Result.GetHashCode() -> int
+override Sondor.Results.Result.ToString() -> string!
+override Sondor.Results.Result<T>.Equals(object? obj) -> bool
+override Sondor.Results.Result<T>.GetHashCode() -> int
+override Sondor.Results.Result<T>.ToString() -> string!
+Sondor.Results.Error
+Sondor.Results.Error.Code.get -> string!
+Sondor.Results.Error.Code.init -> void
+Sondor.Results.Error.Deconstruct(out string! Code, out string! Description, out Sondor.Results.ErrorType Type) -> void
+Sondor.Results.Error.Description.get -> string!
+Sondor.Results.Error.Description.init -> void
+Sondor.Results.Error.Equals(Sondor.Results.Error other) -> bool
+Sondor.Results.Error.Error() -> void
+Sondor.Results.Error.Error(string! Code, string! Description, Sondor.Results.ErrorType Type) -> void
+Sondor.Results.Error.IsNone.get -> bool
+Sondor.Results.Error.Type.get -> Sondor.Results.ErrorType
+Sondor.Results.Error.Type.init -> void
+Sondor.Results.ErrorType
+Sondor.Results.ErrorType.Conflict = 3 -> Sondor.Results.ErrorType
+Sondor.Results.ErrorType.Failure = 0 -> Sondor.Results.ErrorType
+Sondor.Results.ErrorType.FeatureDisabled = 7 -> Sondor.Results.ErrorType
+Sondor.Results.ErrorType.Forbidden = 5 -> Sondor.Results.ErrorType
+Sondor.Results.ErrorType.InternalServerError = 6 -> Sondor.Results.ErrorType
+Sondor.Results.ErrorType.NotFound = 2 -> Sondor.Results.ErrorType
+Sondor.Results.ErrorType.RateLimited = 8 -> Sondor.Results.ErrorType
+Sondor.Results.ErrorType.Unauthorized = 4 -> Sondor.Results.ErrorType
+Sondor.Results.ErrorType.Validation = 1 -> Sondor.Results.ErrorType
+Sondor.Results.IResultState
+Sondor.Results.IResultState.Error.get -> Sondor.Results.Error
+Sondor.Results.IResultState.IsSuccess.get -> bool
+Sondor.Results.Result
+Sondor.Results.Result.Bind(System.Func<Sondor.Results.Result>! next) -> Sondor.Results.Result
+Sondor.Results.Result.Bind<T>(System.Func<Sondor.Results.Result<T>>! next) -> Sondor.Results.Result<T>
+Sondor.Results.Result.Equals(Sondor.Results.Result other) -> bool
+Sondor.Results.Result.Error.get -> Sondor.Results.Error
+Sondor.Results.Result.IsFailure.get -> bool
+Sondor.Results.Result.IsSuccess.get -> bool
+Sondor.Results.Result.Map<T>(System.Func<T>! map) -> Sondor.Results.Result<T>
+Sondor.Results.Result.Match<TResult>(System.Func<TResult>! onSuccess, System.Func<Sondor.Results.Error, TResult>! onFailure) -> TResult
+Sondor.Results.Result.Result() -> void
+Sondor.Results.Result.Tap(System.Action! action) -> Sondor.Results.Result
+Sondor.Results.Result<T>
+Sondor.Results.Result<T>.Bind<TNext>(System.Func<T, Sondor.Results.Result<TNext>>! next) -> Sondor.Results.Result<TNext>
+Sondor.Results.Result<T>.Ensure(System.Func<T, bool>! predicate, Sondor.Results.Error error) -> Sondor.Results.Result<T>
+Sondor.Results.Result<T>.Equals(Sondor.Results.Result<T> other) -> bool
+Sondor.Results.Result<T>.Error.get -> Sondor.Results.Error
+Sondor.Results.Result<T>.IsFailure.get -> bool
+Sondor.Results.Result<T>.IsSuccess.get -> bool
+Sondor.Results.Result<T>.Map<TNext>(System.Func<T, TNext>! map) -> Sondor.Results.Result<TNext>
+Sondor.Results.Result<T>.Match<TResult>(System.Func<T, TResult>! onSuccess, System.Func<Sondor.Results.Error, TResult>! onFailure) -> TResult
+Sondor.Results.Result<T>.Result() -> void
+Sondor.Results.Result<T>.Tap(System.Action<T>! action) -> Sondor.Results.Result<T>
+Sondor.Results.Result<T>.TryGetValue(out T value) -> bool
+Sondor.Results.Result<T>.Value.get -> T
+static readonly Sondor.Results.Error.None -> Sondor.Results.Error
+static readonly Sondor.Results.Error.NullValue -> Sondor.Results.Error
+static readonly Sondor.Results.Error.Unspecified -> Sondor.Results.Error
+static Sondor.Results.Error.operator !=(Sondor.Results.Error left, Sondor.Results.Error right) -> bool
+static Sondor.Results.Error.operator ==(Sondor.Results.Error left, Sondor.Results.Error right) -> bool
+static Sondor.Results.Result.Failure(Sondor.Results.Error error) -> Sondor.Results.Result
+static Sondor.Results.Result.Failure<T>(Sondor.Results.Error error) -> Sondor.Results.Result<T>
+static Sondor.Results.Result.implicit operator Sondor.Results.Result(Sondor.Results.Error error) -> Sondor.Results.Result
+static Sondor.Results.Result.operator !=(Sondor.Results.Result left, Sondor.Results.Result right) -> bool
+static Sondor.Results.Result.operator ==(Sondor.Results.Result left, Sondor.Results.Result right) -> bool
+static Sondor.Results.Result.Success() -> Sondor.Results.Result
+static Sondor.Results.Result.Success<T>(T value) -> Sondor.Results.Result<T>
+static Sondor.Results.Result<T>.implicit operator Sondor.Results.Result(Sondor.Results.Result<T> result) -> Sondor.Results.Result
+static Sondor.Results.Result<T>.implicit operator Sondor.Results.Result<T>(Sondor.Results.Error error) -> Sondor.Results.Result<T>
+static Sondor.Results.Result<T>.implicit operator Sondor.Results.Result<T>(T value) -> Sondor.Results.Result<T>
+static Sondor.Results.Result<T>.operator !=(Sondor.Results.Result<T> left, Sondor.Results.Result<T> right) -> bool
+static Sondor.Results.Result<T>.operator ==(Sondor.Results.Result<T> left, Sondor.Results.Result<T> right) -> bool
+~override Sondor.Results.Error.Equals(object obj) -> bool
+~override Sondor.Results.Error.ToString() -> string

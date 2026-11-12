@@ -1,0 +1,9 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <MinVerTagPrefix>results-v</MinVerTagPrefix>
+    <Description>Failures as values: Result, Result&lt;T&gt; and Error, with stable Area.Reason codes and an error type. No dependencies.</Description>
+    <PackageTags>result;error-handling;railway;functional</PackageTags>
+  </PropertyGroup>
+
+</Project>
