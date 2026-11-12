@@ -170,8 +170,10 @@ jobs:
           name: package
           path: package
 
-      # Creating the release creates the tag, at the commit that was built. Only repository admins and this workflow can
-      # create a release tag (build/policy/rulesets/release-tags-create.json), and it can never be moved afterwards.
+      # Creating the release creates the tag, at the commit that was built, and the tag can never be moved or deleted
+      # afterwards (build/policy/rulesets/release-tags-immutable.json). The workflow can create it only because creating a
+      # tag is not restricted: GitHub does not let the Actions app on a ruleset's bypass list, so a creation rule would
+      # block this step. A release tag is not what starts a release, so a stray one cannot publish anything.
       # Notes cover the commits since the previous release of the same package, not of the whole repository.
       - name: Create the tag and the release
         env:

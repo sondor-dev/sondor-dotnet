@@ -10,8 +10,7 @@ reviewed like code, and can be put back if someone changes them by accident.
 | `environments.json` | The `nuget` environment the release workflow publishes from: you must approve each deployment, admins cannot skip that, and only `main` can deploy to it. Deployment rules that are not listed are removed |
 | `code-scanning.json` | GitHub's "default setup" for code scanning stays off, because CodeQL runs from `.github/workflows/codeql.yml` (versioned with the repository, and it survives a move) |
 | `rulesets/main.json` | `main`: changes by pull request only, squash and linear history, the CI checks must pass, no force-push, no deletion |
-| `rulesets/release-tags-create.json` | Only repository admins and the release workflow (the GitHub Actions app) can create a release tag (`*-v*`); the workflow creates it after the package is published |
-| `rulesets/release-tags-immutable.json` | A release tag can never be moved or deleted |
+| `rulesets/release-tags-immutable.json` | A release tag (`*-v*`) can never be moved or deleted. Creating one is deliberately not restricted: GitHub does not let the Actions app on a ruleset's bypass list, so a creation rule would stop the release workflow tagging its own release, and a tag does not start anything. Publishing is gated by the `nuget` environment instead |
 
 Private vulnerability reporting and Dependabot alerts are checked too. They have their own settings page in GitHub.
 
