@@ -4,13 +4,21 @@ updates:
     directory: /
     schedule:
       interval: weekly
+    # Titles follow the repository's Conventional Commits, so a squash merge needs no retyping: "chore(deps): bump ...".
+    commit-message:
+      prefix: "chore(deps)"
     groups:
-      microsoft:
-        patterns: ["Microsoft.*", "System.*"]
+      # A package belongs to one group only: Microsoft.NET.Test.Sdk matches both patterns below, so it is excluded from the
+      # broader one. Otherwise two pull requests change the same line and the second always conflicts.
       testing:
         patterns: ["NUnit*", "coverlet.*", "Microsoft.NET.Test.Sdk"]
+      microsoft:
+        patterns: ["Microsoft.*", "System.*"]
+        exclude-patterns: ["Microsoft.NET.Test.Sdk"]
 
   - package-ecosystem: github-actions
     directory: /
     schedule:
       interval: weekly
+    commit-message:
+      prefix: "chore(ci)"
