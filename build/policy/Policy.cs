@@ -137,8 +137,9 @@ static string? RepositoryFromOrigin()
     return path.EndsWith(".git", StringComparison.OrdinalIgnoreCase) ? path[..^4] : path;
 }
 
-// An environment is described by who must approve a deployment and which tags may deploy to it. GitHub reports it in a
-// different shape from the one it accepts, so it is compared by meaning rather than as a JSON subset.
+// An environment is described by who must approve a deployment and which branches or tags may deploy to it. GitHub reports it
+// in a different shape from the one it accepts, so it is compared by meaning rather than as a JSON subset. The deployment
+// refs are managed completely: one that is not listed is removed, so a rule that no longer applies cannot linger.
 static async Task SyncEnvironment(Report report, GitHub gh, string repo, string name, JsonNode policy)
 {
     var label = $"environment '{name}'";
@@ -147,16 +148,19 @@ static async Task SyncEnvironment(Report report, GitHub gh, string repo, string 
     var reviewers = policy["reviewers"]!.AsArray().Select(node => node!.GetValue<string>()).Order(StringComparer.Ordinal).ToArray();
     var preventSelfReview = policy["prevent_self_review"]!.GetValue<bool>();
     var canAdminsBypass = policy["can_admins_bypass"]!.GetValue<bool>();
-    var tagPatterns = policy["tag_patterns"]!.AsArray().Select(node => node!.GetValue<string>()).ToArray();
+    var wantedRefs = policy["deployment_refs"]!.AsArray()
+        .Select(node => (Name: node!["name"]!.GetValue<string>(), Type: node["type"]!.GetValue<string>()))
+        .ToArray();
 
     var have = await gh.Get(path);
     var differences = new List<string>();
-    var missingPatterns = new List<string>();
+    var missingRefs = new List<(string Name, string Type)>();
+    var staleRefIds = new List<long>();
 
     if (have is null)
     {
         differences.Add("missing");
-        missingPatterns.AddRange(tagPatterns);
+        missingRefs.AddRange(wantedRefs);
     }
     else
     {
@@ -185,23 +189,29 @@ static async Task SyncEnvironment(Report report, GitHub gh, string repo, string 
 
         if (have["deployment_branch_policy"]?["custom_branch_policies"]?.GetValue<bool>() != true)
         {
-            differences.Add("deployments should be limited to the listed tags");
+            differences.Add("deployments should be limited to the listed branches and tags");
         }
 
         var policies = (await gh.Get($"{path}/deployment-branch-policies"))?["branch_policies"]?.AsArray() ?? [];
-        foreach (var pattern in tagPatterns)
+        foreach (var wanted in wantedRefs)
         {
-            var found = policies.Any(item => item?["name"]?.GetValue<string>() == pattern && item["type"]?.GetValue<string>() == "tag");
+            var found = policies.Any(item => item?["name"]?.GetValue<string>() == wanted.Name && item["type"]?.GetValue<string>() == wanted.Type);
             if (!found)
             {
-                missingPatterns.Add(pattern);
-                differences.Add($"tag pattern '{pattern}' is not allowed");
+                missingRefs.Add(wanted);
+                differences.Add($"{wanted.Type} '{wanted.Name}' is not allowed to deploy");
             }
         }
 
-        foreach (var extra in policies.Select(item => item?["name"]?.GetValue<string>()).OfType<string>().Except(tagPatterns))
+        foreach (var item in policies)
         {
-            Report.Unmanaged($"{label} also allows '{extra}', which is not in the policy; left alone");
+            var itemName = item?["name"]?.GetValue<string>();
+            var itemType = item?["type"]?.GetValue<string>();
+            if (itemName is not null && !wantedRefs.Any(wanted => wanted.Name == itemName && wanted.Type == itemType))
+            {
+                staleRefIds.Add(item!["id"]!.GetValue<long>());
+                differences.Add($"{itemType} '{itemName}' may deploy but is not in the policy");
+            }
         }
     }
 
@@ -233,9 +243,15 @@ static async Task SyncEnvironment(Report report, GitHub gh, string repo, string 
         ["deployment_branch_policy"] = new JsonObject { ["protected_branches"] = false, ["custom_branch_policies"] = true }
     });
 
-    foreach (var pattern in missingPatterns)
+    // Add the wanted refs before removing the others, so there is never a moment when nothing may deploy.
+    foreach (var (refName, refType) in missingRefs)
     {
-        await gh.Send(HttpMethod.Post, $"{path}/deployment-branch-policies", new JsonObject { ["name"] = pattern, ["type"] = "tag" });
+        await gh.Send(HttpMethod.Post, $"{path}/deployment-branch-policies", new JsonObject { ["name"] = refName, ["type"] = refType });
+    }
+
+    foreach (var id in staleRefIds)
+    {
+        await gh.Send(HttpMethod.Delete, $"{path}/deployment-branch-policies/{id.ToString(CultureInfo.InvariantCulture)}", null);
     }
 
     Report.Applied(label);

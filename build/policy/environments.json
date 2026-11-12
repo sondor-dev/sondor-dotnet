@@ -3,6 +3,8 @@
     "reviewers": ["sondor-dev"],
     "prevent_self_review": false,
     "can_admins_bypass": false,
-    "tag_patterns": ["*-v*"]
+    "deployment_refs": [
+      { "name": "main", "type": "branch" }
+    ]
   }
 }
