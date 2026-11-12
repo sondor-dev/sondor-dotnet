@@ -317,7 +317,7 @@ internal sealed class GitHub(string command, string? prefix)
                 return null;
             }
 
-            throw new InvalidOperationException($"GET {path} failed: {result.Error.Trim()}");
+            throw new InvalidOperationException($"GET {path} failed: {result.Error.Trim()} {result.Output.Trim()}");
         }
 
         return string.IsNullOrWhiteSpace(result.Output) ? JsonNode.Parse("{}") : JsonNode.Parse(result.Output);
@@ -328,7 +328,7 @@ internal sealed class GitHub(string command, string? prefix)
         var result = await Run(["api", "--method", method.Method, path, "--input", "-"], body?.ToJsonString() ?? "{}");
         if (result.ExitCode != 0)
         {
-            throw new InvalidOperationException($"{method.Method} {path} failed: {result.Error.Trim()}");
+            throw new InvalidOperationException($"{method.Method} {path} failed: {result.Error.Trim()} {result.Output.Trim()}");
         }
     }
 
