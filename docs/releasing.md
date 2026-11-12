@@ -1,82 +1,98 @@
 # Releasing a package
 
-Each package is versioned and released on its own, by pushing a tag.
+Each package is versioned and released on its own, from the Actions tab. The workflow works out the version, publishes, and
+only then creates the tag, so **a release tag always means the package is on nuget.org**.
 
 ## Versions
 
-[MinVer](https://github.com/adamralph/minver) takes a package's version from the nearest tag with its prefix. A package sets
-its prefix in its project file (`<MinVerTagPrefix>results-v</MinVerTagPrefix>`), so these tags are independent:
+A package's version is its last stable release tag plus a bump. Tags are `<prefix>-v<version>`, where the prefix is the
+package's `MinVerTagPrefix`:
 
 ```
-results-v1.0.0
+results-v0.1.0
 cqrs-v0.3.1
 ```
 
-A commit after the last tag builds as a pre-release (`1.0.1-preview.0.4`), which is what a local build and a pull request
-produce.
+A build that is not a release (a pull request, a local build) is versioned by [MinVer](https://github.com/adamralph/minver)
+from the nearest tag, as a pre-release such as `0.1.1-preview.0.4`.
 
 ## Releasing
 
 1. Make sure `main` is green and holds what you want to release.
-2. Move the package's `PublicAPI.Unshipped.txt` entries into `PublicAPI.Shipped.txt`, in a pull request, and merge it.
-3. Tag the merged commit and push the tag:
+2. For a **stable** release, move the package's `PublicAPI.Unshipped.txt` entries into `PublicAPI.Shipped.txt` in a pull
+   request, and merge it. The workflow refuses a stable release while anything is left in the unshipped file.
+3. Open the repository's **Actions** tab → **Release** → **Run workflow**, from `main`, and fill in:
 
-   ```bash
-   git tag results-v1.0.0
-   git push origin results-v1.0.0
-   ```
+   | Input | What to enter |
+   |---|---|
+   | Package | The package ID, for example `Sondor.Results` |
+   | Bump | `patch`, `minor` or `major`, applied to the last stable release |
+   | Version | Only for a package's **first** stable release, or to jump: an exact `major.minor.patch`. It wins over the bump. |
+   | Pre-release | Empty for a stable release, or a label such as `preview.1` or `rc.1` |
 
-4. The [Release workflow](../.github/workflows/release.yml) runs. It:
-   - checks the tag is a release tag, names exactly one package, and points at a commit on `main`;
-   - builds and tests everything, then packs the one package, and checks the file is exactly `<package>.<version>.nupkg`;
-   - **waits for your approval** in the `nuget` environment, then publishes to nuget.org;
-   - creates the GitHub release, with notes covering the changes since the previous release of that package.
+4. The workflow:
+   - **plans** the release: works out the version and the tag, and stops with the reason if the request cannot be released
+     (an unknown package, a malformed version, a tag that already exists, a first release without a version);
+   - **builds and tests** everything, then packs that one package at that version and checks the file is what was planned;
+   - **waits for your approval** in the `nuget` environment (a yellow *Review deployments* banner on the run), then publishes
+     to nuget.org;
+   - **creates the tag and the GitHub release** at the commit that was built, with notes covering the changes since the
+     package's previous release.
 
-A tag with a suffix (`results-v1.0.0-preview.1`) is published as a pre-release. A release tag cannot be moved or deleted once
-pushed, so a bad release is fixed by releasing the next version, and the bad one is unlisted on nuget.org.
+If the publish fails, nothing is tagged and nothing is half-released: fix the cause and run the workflow again with the same
+inputs. If it fails after the package was published (the tag step), run it again: the push skips a version that is already on
+nuget.org and the workflow carries on to the tag.
 
-Only repository admins can create a release tag, and nothing can publish without going through the `nuget` environment.
+### Examples
+
+| Goal | Bump | Version | Pre-release | Result (from last stable 0.1.4) |
+|---|---|---|---|---|
+| First stable release (none yet) | `patch` | `0.1.0` | | 0.1.0 |
+| A fix | `patch` | | | 0.1.5 |
+| A new feature | `minor` | | | 0.2.0 |
+| Promote to 1.0 | `major` | | | 1.0.0 |
+| Try the next minor first | `minor` | | `preview.1` | 0.2.0-preview.1 |
+
+Releases below 1.0 may still change their API; each package stays at 0.x until it has been used for real.
 
 ## Version rules
 
 - A breaking change to a public API is a new **major** version. `EnablePackageValidation` fails the pack otherwise.
 - A new public API is a **minor** version.
 - A fix is a **patch** version.
-- Below 1.0 the API may still change; each package stays at 0.x until it has been used for real.
+
+A release tag cannot be moved or deleted once created, so a bad release is fixed by releasing the next version, and the bad
+one is unlisted on nuget.org.
 
 ## One-time setup
 
 Done once per repository, not per package.
 
-1. **Create the `nuget` environment** (approval and tag rule). Do this before the first release: GitHub creates a missing
-   environment with no protection at all.
+1. **The `nuget` environment and the tag rules.** They are described in `build/policy` and applied with:
 
    ```bash
    dotnet run build/policy/Policy.cs -- --apply
    ```
 
-2. **Reserve the package ID prefix on nuget.org.** Sign in, open *Account → Reserved prefixes* (or the form linked from the
-   [prefix reservation documentation](https://learn.microsoft.com/nuget/nuget-org/id-prefix-reservation)) and request `Sondor.`.
-   Reserved packages get a verified badge and nobody else can publish under the prefix. Approval is manual and can take a few
-   days; publishing works in the meantime.
-3. **Add a trusted-publishing policy on nuget.org.** In *Account → Trusted Publishing* add a policy with:
+   Do this before the first release: GitHub creates a missing environment with no protection at all.
+2. **Reserve the package ID prefix on nuget.org.** Email account@nuget.org with your owner display name and the prefix
+   `Sondor.`; see the
+   [prefix reservation documentation](https://learn.microsoft.com/nuget/nuget-org/id-prefix-reservation). Reserved packages get
+   a verified badge and nobody else can publish under the prefix. Publishing works while the request is pending.
+3. **A trusted-publishing policy on nuget.org** (*Account → Trusted Publishing*):
    - repository owner `sondor-dev` and repository `sondor-dotnet`;
    - workflow file `release.yml`;
-   - environment `nuget`.
+   - environment `nuget`;
+   - the push permission only, and the package pattern `Sondor.*`. Unlisting is deliberately not allowed from CI.
 
-   No API key is created or stored. The workflow exchanges its own identity for a key that lasts a short time.
-4. **Tell the workflow whose policy to use.** Add a repository variable named `NUGET_USER` holding your nuget.org *profile name*
-   (not your email). It is a variable, not a secret: the name is public.
+   No API key is created or stored. The workflow exchanges its own identity for a key that lasts a short time. The policy
+   belongs to the nuget.org account that owns the packages, and the login is only accepted from a job in `release.yml`.
+4. **A repository variable** named `NUGET_USER` holding the nuget.org *profile name* (not the email). It is a variable, not
+   a secret: the name is public. If the profile is renamed, update it.
 
    ```bash
    gh variable set NUGET_USER --repo sondor-dev/sondor-dotnet
    ```
 
-The policy belongs to the nuget.org account (or organisation) that owns the packages, and the workflow's login step is only
-accepted from a job in the workflow file the policy names (`release.yml`), not from a reusable workflow in another repository.
-See the [trusted publishing documentation](https://learn.microsoft.com/nuget/nuget-org/trusted-publishing).
-
-**The first release of a package ID that has never been published:** check, on the policy page, that nuget.org accepts the
-temporary key for creating a new ID. If it does not, publish that first version once with an API key from your account
-scoped to push new packages (glob `Sondor.*`), delete the key straight after, and use trusted publishing for every release
-from then on. This has not been tried yet; update this paragraph with what happens.
+The first release of a brand-new package ID works with the temporary key: `Sondor.Results` 0.1.0-preview.1 was published
+that way.

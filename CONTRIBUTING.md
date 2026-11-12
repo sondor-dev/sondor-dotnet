@@ -38,8 +38,9 @@ consumers of the last release.
 
 ## Releasing
 
-A package is released by tagging a commit `<prefix>-v<version>`, for example `results-v1.2.0`. MinVer takes the package
-version from that tag. See [docs/releasing.md](docs/releasing.md).
+Only maintainers release, from the Actions tab: the release workflow works out the next version of a package from its last
+release tag, publishes it, and then creates the tag (`<prefix>-v<version>`, for example `results-v1.2.0`). You do not tag
+anything in a pull request. See [docs/releasing.md](docs/releasing.md).
 
 ## Conduct
 

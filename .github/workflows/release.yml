@@ -1,51 +1,93 @@
 name: Release
 
-# A package is released by pushing a tag <prefix>-v<version>, for example results-v1.2.3 (see docs/releasing.md). Only
-# repository admins can create such a tag (build/policy/rulesets), and it can never be moved or deleted afterwards.
+# Run from the Actions tab: choose the package and the bump. The workflow works out the version from the package's last
+# release tag, builds and tests, waits for your approval, publishes to nuget.org, and only then creates the tag and the
+# GitHub release, so a release tag always means the package is on nuget.org (see docs/releasing.md).
 #
-#   build   -> checks the tag, tests everything, packs the one package the tag names
+#   plan    -> works out the version and the tag from the request
+#   build   -> tests everything and packs the one package at that version
 #   publish -> pushes it to nuget.org from the protected "nuget" environment, with a short-lived key (trusted publishing)
-#   release -> creates the GitHub release with notes and the package attached
+#   release -> creates the tag and the GitHub release, with notes since the package's previous release
 on:
-  push:
-    tags: ["*-v*"]
+  workflow_dispatch:
+    inputs:
+      package:
+        description: "Package to release, for example Sondor.Results"
+        type: string
+        required: true
+      bump:
+        description: "How to bump the last stable release (ignored when a version is given)"
+        type: choice
+        options: [patch, minor, major]
+        default: patch
+      version:
+        description: "Exact version, major.minor.patch. Needed for a package's first stable release; leave empty otherwise"
+        type: string
+        required: false
+      prerelease:
+        description: "Pre-release label, for example preview.1. Leave empty for a stable release"
+        type: string
+        required: false
 
 permissions:
   contents: read
 
-# Two pushes of the same tag must not publish twice at once; a release in progress is never cancelled.
+# Two releases of the same package must not run at once; a release in progress is never cancelled.
 concurrency:
-  group: release-${{ github.ref_name }}
+  group: release-${{ inputs.package }}
   cancel-in-progress: false
 
 jobs:
-  build:
-    name: Build and pack
+  plan:
+    name: Plan the release
+    # Only ever from main: a release is something that went through a pull request and its checks.
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     outputs:
-      package: ${{ steps.tag.outputs.package }}
-      version: ${{ steps.tag.outputs.version }}
-      prerelease: ${{ steps.tag.outputs.prerelease }}
+      package: ${{ steps.plan.outputs.package }}
+      project: ${{ steps.plan.outputs.project }}
+      version: ${{ steps.plan.outputs.version }}
+      tag: ${{ steps.plan.outputs.tag }}
+      previous: ${{ steps.plan.outputs.previous }}
+      prerelease: ${{ steps.plan.outputs.prerelease }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          # MinVer works out the version from the tag, and the main check below needs the history.
+          # The last release tags are the starting point of the version.
           fetch-depth: 0
 
-      # A release must be something that went through a pull request and its checks.
-      - name: Check the tagged commit is on main
+      # Inputs go through the environment, never into the script text, so a crafted value cannot become a command.
+      - name: Work out the version
+        id: plan
+        env:
+          PACKAGE: ${{ inputs.package }}
+          BUMP: ${{ inputs.bump }}
+          VERSION: ${{ inputs.version }}
+          PRERELEASE: ${{ inputs.prerelease }}
         run: |
-          git fetch --no-tags origin main
-          if ! git merge-base --is-ancestor "$GITHUB_SHA" origin/main; then
-            echo "::error::The tagged commit is not on main. Release from a commit that has been merged."
+          # Written to a file first, not piped: a pipe would hide the script's failure behind the exit code of tee.
+          bash build/next-release.sh "$PACKAGE" "$BUMP" "$VERSION" "$PRERELEASE" > "$RUNNER_TEMP/plan.txt"
+          cat "$RUNNER_TEMP/plan.txt"
+          cat "$RUNNER_TEMP/plan.txt" >> "$GITHUB_OUTPUT"
+
+      # A stable release ships the API it declares: nothing may be left in the "unshipped" file.
+      - name: Check the public API is shipped
+        if: steps.plan.outputs.prerelease == 'false'
+        env:
+          PACKAGE: ${{ steps.plan.outputs.package }}
+        run: |
+          unshipped="src/${PACKAGE}/PublicAPI.Unshipped.txt"
+          if grep -qvE '^(#nullable enable)?[[:space:]]*$' "$unshipped"; then
+            echo "::error::$unshipped still lists API that has not shipped. Move it into PublicAPI.Shipped.txt in a pull request first."
             exit 1
           fi
 
-      - name: Work out which package the tag is for
-        id: tag
-        env:
-          TAG: ${{ github.ref_name }}
-        run: bash build/resolve-release.sh "$TAG" >> "$GITHUB_OUTPUT"
+  build:
+    name: Build and pack
+    needs: plan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - uses: actions/setup-dotnet@0f4a354dd5547a28c70b7853dbd95d5b67886e73 # v6.1.0
         with:
@@ -60,16 +102,17 @@ jobs:
       - name: Test
         run: dotnet test Sondor.slnx --configuration Release --no-build
 
+      # The version is given to the build directly: the tag does not exist yet, it is created after the publish.
       - name: Pack
         env:
-          PROJECT: ${{ steps.tag.outputs.project }}
-        run: dotnet pack "$PROJECT" --configuration Release --no-build
+          PROJECT: ${{ needs.plan.outputs.project }}
+          VERSION: ${{ needs.plan.outputs.version }}
+        run: dotnet pack "$PROJECT" --configuration Release --no-restore -p:MinVerVersionOverride="$VERSION"
 
-      # MinVer took the version from the tag; make sure what was packed is exactly what the tag says.
-      - name: Check the package is the one the tag names
+      - name: Check the package is the one that was planned
         env:
-          PACKAGE: ${{ steps.tag.outputs.package }}
-          VERSION: ${{ steps.tag.outputs.version }}
+          PACKAGE: ${{ needs.plan.outputs.package }}
+          VERSION: ${{ needs.plan.outputs.version }}
         run: |
           expected="artifacts/package/release/${PACKAGE}.${VERSION}.nupkg"
           if [ ! -f "$expected" ]; then
@@ -88,9 +131,9 @@ jobs:
 
   publish:
     name: Publish to nuget.org
-    needs: build
+    needs: [plan, build]
     runs-on: ubuntu-latest
-    # The environment is where the approval and the "tags only" rule live; see build/policy/environments.json.
+    # The environment is where the approval and the "main only" rule live; see build/policy/environments.json.
     environment: nuget
     permissions:
       contents: read
@@ -109,42 +152,38 @@ jobs:
         with:
           user: ${{ vars.NUGET_USER }}
 
-      # Re-running a failed release must not fail because the version is already there.
+      # Re-running after a failure later in the workflow must not fail because the version is already there.
       - name: Push
         env:
           NUGET_API_KEY: ${{ steps.login.outputs.NUGET_API_KEY }}
         run: dotnet nuget push "package/*.nupkg" --api-key "$NUGET_API_KEY" --source https://api.nuget.org/v3/index.json --skip-duplicate
 
   release:
-    name: GitHub release
-    needs: [build, publish]
+    name: Tag and GitHub release
+    needs: [plan, publish]
     runs-on: ubuntu-latest
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          fetch-depth: 0
-
       - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           name: package
           path: package
 
+      # Creating the release creates the tag, at the commit that was built. Only repository admins and this workflow can
+      # create a release tag (build/policy/rulesets/release-tags-create.json), and it can never be moved afterwards.
       # Notes cover the commits since the previous release of the same package, not of the whole repository.
-      - name: Create the release
+      - name: Create the tag and the release
         env:
           GH_TOKEN: ${{ github.token }}
-          TAG: ${{ github.ref_name }}
-          PACKAGE: ${{ needs.build.outputs.package }}
-          VERSION: ${{ needs.build.outputs.version }}
-          PRERELEASE: ${{ needs.build.outputs.prerelease }}
+          TAG: ${{ needs.plan.outputs.tag }}
+          PACKAGE: ${{ needs.plan.outputs.package }}
+          VERSION: ${{ needs.plan.outputs.version }}
+          PREVIOUS: ${{ needs.plan.outputs.previous }}
+          PRERELEASE: ${{ needs.plan.outputs.prerelease }}
         run: |
-          prefix="${TAG%%-v*}"
-          previous=$(git tag --list "${prefix}-v*" --sort=-v:refname | grep -vxF "$TAG" | head -n 1 || true)
-
-          args=(--title "${PACKAGE} ${VERSION}" --generate-notes --verify-tag)
-          if [ -n "$previous" ]; then args+=(--notes-start-tag "$previous"); fi
+          args=(--repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" --title "${PACKAGE} ${VERSION}" --generate-notes)
+          if [ -n "$PREVIOUS" ]; then args+=(--notes-start-tag "$PREVIOUS"); fi
           if [ "$PRERELEASE" = "true" ]; then args+=(--prerelease); fi
 
           gh release create "$TAG" "${args[@]}" package/*.nupkg package/*.snupkg
