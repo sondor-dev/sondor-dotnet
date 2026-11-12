@@ -38,7 +38,7 @@ jobs:
             echo "No projects yet."
           fi
 
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/setup-dotnet@v6
         if: steps.projects.outputs.found == 'true'
         with:
           global-json-file: global.json
