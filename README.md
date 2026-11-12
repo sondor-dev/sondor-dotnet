@@ -7,14 +7,14 @@ is released on its own.
 [![CI](https://github.com/sondor-dev/sondor-dotnet/actions/workflows/ci.yml/badge.svg)](https://github.com/sondor-dev/sondor-dotnet/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-> **Status:** the repository has just been set up and holds no packages yet. The first ones are on their way; the table
-> below is the plan, not a promise of dates.
+> **Status:** early. Nothing is published to nuget.org yet; the first package is being built. The table below is the plan,
+> not a promise of dates.
 
 ## Packages
 
 | Package | What it is | Status |
 |---|---|---|
-| `Sondor.Results` | `Result`, `Result<T>` and `Error`: failures as values, with stable `Area.Reason` codes | planned |
+| [`Sondor.Results`](src/Sondor.Results) | `Result`, `Result<T>` and `Error`: failures as values, with stable `Area.Reason` codes | in development |
 | `Sondor.Options` | Options bound from configuration, validated at start-up | planned |
 | `Sondor.Cqrs` | In-process commands, queries and events with a pipeline of behaviours | planned |
 | `Sondor.AspNetCore` | `Result` to RFC 9457 problem details, with `errorCode` and `traceId` | planned |
