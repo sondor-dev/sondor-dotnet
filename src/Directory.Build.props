@@ -1,0 +1,47 @@
+<Project>
+  <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)../'))" />
+
+  <!-- Libraries: every project under src/ is a package. -->
+  <PropertyGroup>
+    <IsPackable>true</IsPackable>
+    <AnalysisModeSecurity>All</AnalysisModeSecurity>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+
+    <Authors>Sondor Dev</Authors>
+    <Copyright>Copyright (c) 2026 Sondor Dev</Copyright>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/sondor-dev/sondor-dotnet</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/sondor-dev/sondor-dotnet</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+
+    <!-- Symbols and source link, so a consumer can step into the package. -->
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+
+    <!-- A package is a promise: breaking its public API by accident fails the build. -->
+    <EnablePackageValidation>true</EnablePackageValidation>
+
+    <!-- Each package is versioned by its own tag, e.g. <MinVerTagPrefix>results-v</MinVerTagPrefix> in its project file. -->
+    <MinVerDefaultPreReleaseIdentifiers>preview.0</MinVerDefaultPreReleaseIdentifiers>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MinVer" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.SourceLink.GitHub" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.CodeAnalysis.PublicApiAnalyzers" PrivateAssets="all" />
+  </ItemGroup>
+
+  <!-- The public API of each package, checked by the analyzer: PublicAPI.Shipped.txt (released) and PublicAPI.Unshipped.txt (next release). -->
+  <ItemGroup>
+    <AdditionalFiles Include="PublicAPI.Shipped.txt" />
+    <AdditionalFiles Include="PublicAPI.Unshipped.txt" />
+  </ItemGroup>
+
+  <!-- Each package's README is shown on nuget.org. -->
+  <ItemGroup>
+    <None Include="README.md" Pack="true" PackagePath="\" Condition="Exists('README.md')" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,75 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build and test (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # MinVer works out each package's version from its tags.
+          fetch-depth: 0
+
+      # Until the first package lands there is nothing to build; the job passes rather than failing on an empty solution.
+      - name: Look for projects
+        id: projects
+        shell: bash
+        run: |
+          if [ -n "$(find src tests -name '*.csproj' 2>/dev/null)" ]; then
+            echo "found=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "found=false" >> "$GITHUB_OUTPUT"
+            echo "No projects yet."
+          fi
+
+      - uses: actions/setup-dotnet@v4
+        if: steps.projects.outputs.found == 'true'
+        with:
+          global-json-file: global.json
+
+      - name: Restore
+        if: steps.projects.outputs.found == 'true'
+        run: dotnet restore Sondor.slnx
+
+      - name: Build
+        if: steps.projects.outputs.found == 'true'
+        run: dotnet build Sondor.slnx --configuration Release --no-restore
+
+      - name: Check formatting
+        if: steps.projects.outputs.found == 'true'
+        run: dotnet format Sondor.slnx --verify-no-changes --no-restore
+
+      - name: Test
+        if: steps.projects.outputs.found == 'true'
+        run: >
+          dotnet test Sondor.slnx --configuration Release --no-build
+          --collect:"XPlat Code Coverage" --results-directory artifacts/test-results
+
+      # Packing on every run catches a broken package (missing README, API break against the last release) before a tag does.
+      - name: Pack
+        if: steps.projects.outputs.found == 'true' && matrix.os == 'ubuntu-latest'
+        run: dotnet pack Sondor.slnx --configuration Release --no-build
+
+      - name: Upload test results
+        if: always() && steps.projects.outputs.found == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-${{ matrix.os }}
+          path: artifacts/test-results
+          if-no-files-found: ignore

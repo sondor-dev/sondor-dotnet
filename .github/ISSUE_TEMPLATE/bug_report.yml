@@ -1,0 +1,26 @@
+name: Bug report
+description: Something does not work as documented
+labels: [bug]
+body:
+  - type: input
+    id: package
+    attributes:
+      label: Package and version
+      placeholder: Sondor.Results 1.0.0
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened, and what did you expect?
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Minimal code to reproduce
+      render: csharp
+  - type: input
+    id: runtime
+    attributes:
+      label: .NET version and OS
