@@ -1,0 +1,150 @@
+name: Release
+
+# A package is released by pushing a tag <prefix>-v<version>, for example results-v1.2.3 (see docs/releasing.md). Only
+# repository admins can create such a tag (build/policy/rulesets), and it can never be moved or deleted afterwards.
+#
+#   build   -> checks the tag, tests everything, packs the one package the tag names
+#   publish -> pushes it to nuget.org from the protected "nuget" environment, with a short-lived key (trusted publishing)
+#   release -> creates the GitHub release with notes and the package attached
+on:
+  push:
+    tags: ["*-v*"]
+
+permissions:
+  contents: read
+
+# Two pushes of the same tag must not publish twice at once; a release in progress is never cancelled.
+concurrency:
+  group: release-${{ github.ref_name }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Build and pack
+    runs-on: ubuntu-latest
+    outputs:
+      package: ${{ steps.tag.outputs.package }}
+      version: ${{ steps.tag.outputs.version }}
+      prerelease: ${{ steps.tag.outputs.prerelease }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # MinVer works out the version from the tag, and the main check below needs the history.
+          fetch-depth: 0
+
+      # A release must be something that went through a pull request and its checks.
+      - name: Check the tagged commit is on main
+        run: |
+          git fetch --no-tags origin main
+          if ! git merge-base --is-ancestor "$GITHUB_SHA" origin/main; then
+            echo "::error::The tagged commit is not on main. Release from a commit that has been merged."
+            exit 1
+          fi
+
+      - name: Work out which package the tag is for
+        id: tag
+        env:
+          TAG: ${{ github.ref_name }}
+        run: bash build/resolve-release.sh "$TAG" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/setup-dotnet@0f4a354dd5547a28c70b7853dbd95d5b67886e73 # v6.1.0
+        with:
+          global-json-file: global.json
+
+      - name: Restore
+        run: dotnet restore Sondor.slnx
+
+      - name: Build
+        run: dotnet build Sondor.slnx --configuration Release --no-restore
+
+      - name: Test
+        run: dotnet test Sondor.slnx --configuration Release --no-build
+
+      - name: Pack
+        env:
+          PROJECT: ${{ steps.tag.outputs.project }}
+        run: dotnet pack "$PROJECT" --configuration Release --no-build
+
+      # MinVer took the version from the tag; make sure what was packed is exactly what the tag says.
+      - name: Check the package is the one the tag names
+        env:
+          PACKAGE: ${{ steps.tag.outputs.package }}
+          VERSION: ${{ steps.tag.outputs.version }}
+        run: |
+          expected="artifacts/package/release/${PACKAGE}.${VERSION}.nupkg"
+          if [ ! -f "$expected" ]; then
+            echo "::error::Expected $expected but found:"
+            ls -1 artifacts/package/release
+            exit 1
+          fi
+
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: package
+          path: |
+            artifacts/package/release/*.nupkg
+            artifacts/package/release/*.snupkg
+          if-no-files-found: error
+
+  publish:
+    name: Publish to nuget.org
+    needs: build
+    runs-on: ubuntu-latest
+    # The environment is where the approval and the "tags only" rule live; see build/policy/environments.json.
+    environment: nuget
+    permissions:
+      contents: read
+      # To exchange this workflow's identity for a short-lived nuget.org key. No API key is stored anywhere.
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: package
+          path: package
+
+      # NUGET_USER is the nuget.org profile name that owns the trusted-publishing policy (a repository variable, not a secret).
+      - name: Get a short-lived nuget.org key
+        id: login
+        uses: NuGet/login@8d196754b4036150537f80ac539e15c2f1028841 # v1.2.0
+        with:
+          user: ${{ vars.NUGET_USER }}
+
+      # Re-running a failed release must not fail because the version is already there.
+      - name: Push
+        env:
+          NUGET_API_KEY: ${{ steps.login.outputs.NUGET_API_KEY }}
+        run: dotnet nuget push "package/*.nupkg" --api-key "$NUGET_API_KEY" --source https://api.nuget.org/v3/index.json --skip-duplicate
+
+  release:
+    name: GitHub release
+    needs: [build, publish]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: package
+          path: package
+
+      # Notes cover the commits since the previous release of the same package, not of the whole repository.
+      - name: Create the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+          PACKAGE: ${{ needs.build.outputs.package }}
+          VERSION: ${{ needs.build.outputs.version }}
+          PRERELEASE: ${{ needs.build.outputs.prerelease }}
+        run: |
+          prefix="${TAG%%-v*}"
+          previous=$(git tag --list "${prefix}-v*" --sort=-v:refname | grep -vxF "$TAG" | head -n 1 || true)
+
+          args=(--title "${PACKAGE} ${VERSION}" --generate-notes --verify-tag)
+          if [ -n "$previous" ]; then args+=(--notes-start-tag "$previous"); fi
+          if [ "$PRERELEASE" = "true" ]; then args+=(--prerelease); fi
+
+          gh release create "$TAG" "${args[@]}" package/*.nupkg package/*.snupkg

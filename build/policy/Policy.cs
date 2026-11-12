@@ -54,6 +54,12 @@ foreach (var (name, body) in actions.AsObject())
 // Code scanning runs from .github/workflows/codeql.yml, so GitHub's "default setup" must be off (it blocks that workflow).
 await Sync(report, gh, "code scanning default setup", $"repos/{repo}/code-scanning/default-setup", HttpMethod.Patch, Load("code-scanning.json"));
 
+// Environments: the release workflow publishes from "nuget", and GitHub creates a missing environment with no protection at all.
+foreach (var (environmentName, environmentPolicy) in Load("environments.json").AsObject())
+{
+    await SyncEnvironment(report, gh, repo, environmentName, environmentPolicy!);
+}
+
 // Rulesets.
 var existing = (await gh.Get($"repos/{repo}/rulesets"))?.AsArray() ?? [];
 var managed = new HashSet<string>(StringComparer.Ordinal);
@@ -129,6 +135,110 @@ static string? RepositoryFromOrigin()
     var path = url[(index + marker.Length)..].TrimStart('/', ':');
 
     return path.EndsWith(".git", StringComparison.OrdinalIgnoreCase) ? path[..^4] : path;
+}
+
+// An environment is described by who must approve a deployment and which tags may deploy to it. GitHub reports it in a
+// different shape from the one it accepts, so it is compared by meaning rather than as a JSON subset.
+static async Task SyncEnvironment(Report report, GitHub gh, string repo, string name, JsonNode policy)
+{
+    var label = $"environment '{name}'";
+    var path = $"repos/{repo}/environments/{Uri.EscapeDataString(name)}";
+
+    var reviewers = policy["reviewers"]!.AsArray().Select(node => node!.GetValue<string>()).Order(StringComparer.Ordinal).ToArray();
+    var preventSelfReview = policy["prevent_self_review"]!.GetValue<bool>();
+    var canAdminsBypass = policy["can_admins_bypass"]!.GetValue<bool>();
+    var tagPatterns = policy["tag_patterns"]!.AsArray().Select(node => node!.GetValue<string>()).ToArray();
+
+    var have = await gh.Get(path);
+    var differences = new List<string>();
+    var missingPatterns = new List<string>();
+
+    if (have is null)
+    {
+        differences.Add("missing");
+        missingPatterns.AddRange(tagPatterns);
+    }
+    else
+    {
+        var rule = have["protection_rules"]?.AsArray()
+            .FirstOrDefault(candidate => candidate?["type"]?.GetValue<string>() == "required_reviewers");
+        var haveReviewers = rule?["reviewers"]?.AsArray()
+            .Select(item => item?["reviewer"]?["login"]?.GetValue<string>())
+            .OfType<string>()
+            .Order(StringComparer.Ordinal)
+            .ToArray() ?? [];
+
+        if (!haveReviewers.SequenceEqual(reviewers))
+        {
+            differences.Add($"reviewers should be [{string.Join(", ", reviewers)}] but are [{string.Join(", ", haveReviewers)}]");
+        }
+
+        if ((rule?["prevent_self_review"]?.GetValue<bool>() ?? false) != preventSelfReview)
+        {
+            differences.Add($"prevent_self_review should be {preventSelfReview}");
+        }
+
+        if ((have["can_admins_bypass"]?.GetValue<bool>() ?? true) != canAdminsBypass)
+        {
+            differences.Add($"can_admins_bypass should be {canAdminsBypass}");
+        }
+
+        if (have["deployment_branch_policy"]?["custom_branch_policies"]?.GetValue<bool>() != true)
+        {
+            differences.Add("deployments should be limited to the listed tags");
+        }
+
+        var policies = (await gh.Get($"{path}/deployment-branch-policies"))?["branch_policies"]?.AsArray() ?? [];
+        foreach (var pattern in tagPatterns)
+        {
+            var found = policies.Any(item => item?["name"]?.GetValue<string>() == pattern && item["type"]?.GetValue<string>() == "tag");
+            if (!found)
+            {
+                missingPatterns.Add(pattern);
+                differences.Add($"tag pattern '{pattern}' is not allowed");
+            }
+        }
+
+        foreach (var extra in policies.Select(item => item?["name"]?.GetValue<string>()).OfType<string>().Except(tagPatterns))
+        {
+            Report.Unmanaged($"{label} also allows '{extra}', which is not in the policy; left alone");
+        }
+    }
+
+    if (differences.Count == 0)
+    {
+        Report.Matches(label);
+        return;
+    }
+
+    report.Differs(label, string.Join("; ", differences));
+    if (!report.ApplyMode)
+    {
+        return;
+    }
+
+    var reviewerEntries = new JsonArray();
+    foreach (var login in reviewers)
+    {
+        var user = await gh.Get($"users/{Uri.EscapeDataString(login)}") ?? throw new InvalidOperationException($"GitHub user '{login}' not found.");
+        reviewerEntries.Add(new JsonObject { ["type"] = "User", ["id"] = user["id"]!.GetValue<long>() });
+    }
+
+    await gh.Send(HttpMethod.Put, path, new JsonObject
+    {
+        ["wait_timer"] = 0,
+        ["prevent_self_review"] = preventSelfReview,
+        ["can_admins_bypass"] = canAdminsBypass,
+        ["reviewers"] = reviewerEntries,
+        ["deployment_branch_policy"] = new JsonObject { ["protected_branches"] = false, ["custom_branch_policies"] = true }
+    });
+
+    foreach (var pattern in missingPatterns)
+    {
+        await gh.Send(HttpMethod.Post, $"{path}/deployment-branch-policies", new JsonObject { ["name"] = pattern, ["type"] = "tag" });
+    }
+
+    Report.Applied(label);
 }
 
 static async Task Sync(Report report, GitHub gh, string label, string path, HttpMethod method, JsonNode want)

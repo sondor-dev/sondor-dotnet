@@ -7,6 +7,7 @@ reviewed like code, and can be put back if someone changes them by accident.
 |---|---|
 | `repository.json` | Merge methods (squash only), branch clean-up, wiki and projects off, secret scanning, push protection, Dependabot security updates |
 | `actions.json` | Which actions may run, read-only default token, no pull-request approval by workflows, approval for every outside contributor's workflow run |
+| `environments.json` | The `nuget` environment the release workflow publishes from: you must approve each deployment, admins cannot skip that, and only `*-v*` tags can deploy to it |
 | `code-scanning.json` | GitHub's "default setup" for code scanning stays off, because CodeQL runs from `.github/workflows/codeql.yml` (versioned with the repository, and it survives a move) |
 | `rulesets/main.json` | `main`: changes by pull request only, squash and linear history, the CI checks must pass, no force-push, no deletion |
 | `rulesets/release-tags-create.json` | Only repository admins can create a release tag (`*-v*`), and creating one is what starts a release |
