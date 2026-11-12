@@ -1,8 +1,10 @@
 <Solution>
   <Folder Name="/src/">
+    <Project Path="src/Sondor.Cqrs/Sondor.Cqrs.csproj" />
     <Project Path="src/Sondor.Results/Sondor.Results.csproj" />
   </Folder>
   <Folder Name="/tests/">
+    <Project Path="tests/Sondor.Cqrs.Tests/Sondor.Cqrs.Tests.csproj" />
     <Project Path="tests/Sondor.Results.Tests/Sondor.Results.Tests.csproj" />
   </Folder>
 </Solution>
