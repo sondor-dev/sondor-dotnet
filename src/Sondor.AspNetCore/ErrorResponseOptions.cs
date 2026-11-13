@@ -48,6 +48,8 @@ public sealed class ErrorResponseOptions
         [StatusCodes.Status415UnsupportedMediaType] = "Request.UnsupportedMediaType",
         [StatusCodes.Status429TooManyRequests] = "Request.RateLimited",
         [StatusCodes.Status499ClientClosedRequest] = "Request.Cancelled",
+        [StatusCodes.Status503ServiceUnavailable] = "Request.Unavailable",
+        [StatusCodes.Status504GatewayTimeout] = "Request.GatewayTimeout",
     };
 
     /// <summary>

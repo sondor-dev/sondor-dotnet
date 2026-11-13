@@ -68,6 +68,30 @@ public sealed class OrdersController(IOrders orders) : ControllerBase
 
 `ToHttpResult()` always writes a problem on failure, whatever the caller's `Accept` header says.
 
+### Rejecting a request from a middleware
+
+Code that has no result to return, such as a middleware that refuses a request, reports an `Error` the same way:
+
+```csharp
+app.Use(async (context, next) =>
+{
+    if (!context.Request.Headers.ContainsKey("User-Agent"))
+    {
+        var error = new Error("Request.UserAgentRequired", "A User-Agent header is required.", ErrorType.Validation);
+
+        await error.ToHttpResult().ExecuteAsync(context);
+
+        return;
+    }
+
+    await next(context);
+});
+```
+
+The framework's rate limiter rejects with **503** by default, which is reported as `Request.Unavailable`. Set
+`options.RejectionStatusCode = StatusCodes.Status429TooManyRequests` and a rejected request is reported as `Request.RateLimited`.
+It sends no `Retry-After` header unless the limiter's `OnRejected` callback adds one.
+
 ## Settings
 
 Every setting has a default, so `AddSondorProblemDetails()` alone is a valid setup. They are validated when the host starts.
@@ -89,7 +113,7 @@ They can also be bound from configuration: `services.Configure<ErrorResponseOpti
 | `StatusByCode` | none | The status of one code; wins over `StatusByType`. |
 | `TypeUriTemplate` | none | The `type` of a problem, with `{code}` replaced (URL-escaped). Without it the framework's link to the HTTP status is kept. |
 | `ErrorCodeMember` | `errorCode` | The name of the code member. |
-| `CodeByStatus` | 400 `Request.Invalid`, 401 `Request.Unauthorized`, 403 `Request.Forbidden`, 404 `Request.NotFound`, 409 `Request.Conflict`, 415 `Request.UnsupportedMediaType`, 429 `Request.RateLimited`, 499 `Request.Cancelled` | The code of a problem the framework made on its own. Other statuses get `Request.Failed`, or `Error.Internal` from 500. |
+| `CodeByStatus` | 400 `Request.Invalid`, 401 `Request.Unauthorized`, 403 `Request.Forbidden`, 404 `Request.NotFound`, 409 `Request.Conflict`, 415 `Request.UnsupportedMediaType`, 429 `Request.RateLimited`, 499 `Request.Cancelled`, 503 `Request.Unavailable`, 504 `Request.GatewayTimeout` | The code of a problem the framework made on its own. Other statuses get `Request.Failed`, or `Error.Internal` from 500. |
 | `HandleExceptions` | `true` | Answer an unhandled exception with a problem. |
 | `WriteStatusCodeBodies` | `true` | Give a bare error status a problem body. |
 | `IncludeExceptionDetails` | `false` | Put an unexpected exception's message in `detail`. For development only. |
@@ -192,5 +216,24 @@ The content type is `application/problem+json`.
   An app that wants to place the framework's `UseExceptionHandler()` and `UseStatusCodePages()` itself can skip it and call them.
 - `AddSondorProblemDetails()` calls the framework's `AddProblemDetails()`. Your own `CustomizeProblemDetails` still runs, after
   this package has set the code, so it can adjust it.
+- **Headers set before an exception are lost.** The framework's exception handler clears the response before it answers, so a
+  header set the ordinary way (a security header, a CORS header, a correlation id) is missing from the problem response of an
+  exception, whether it was set before the handler or after it. Only a header added in a `Response.OnStarting` callback survives,
+  because that runs when the response starts, after the handler has finished. Set headers that must always be present like this:
+
+  ```csharp
+  app.Use((context, next) =>
+  {
+      context.Response.OnStarting(() =>
+      {
+          context.Response.Headers["X-Content-Type-Options"] = "nosniff";
+
+          return Task.CompletedTask;
+      });
+
+      return next(context);
+  });
+  ```
+
 - An exception thrown after the response has started cannot be answered; the framework handles that case as it always did.
 - Target framework: .NET 10.

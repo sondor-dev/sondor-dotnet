@@ -58,3 +58,4 @@ static Sondor.AspNetCore.ResultHttpExtensions.ToHttpResult(this Sondor.Results.R
 static Sondor.AspNetCore.ResultHttpExtensions.ToHttpResult<T>(this Sondor.Results.Result<T> result, System.Func<T, Microsoft.AspNetCore.Http.IResult!>? onSuccess = null) -> Microsoft.AspNetCore.Http.IResult!
 ~override Sondor.AspNetCore.ProblemText.Equals(object obj) -> bool
 ~override Sondor.AspNetCore.ProblemText.ToString() -> string
+static Sondor.AspNetCore.ResultHttpExtensions.ToHttpResult(this Sondor.Results.Error error) -> Microsoft.AspNetCore.Http.IResult!

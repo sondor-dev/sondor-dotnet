@@ -3,9 +3,18 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Sondor.AspNetCore;
 
-/// <summary>Turns a <see cref="Result"/> into an HTTP response.</summary>
+/// <summary>Turns a <see cref="Result"/>, or an <see cref="Error"/>, into an HTTP response.</summary>
 public static class ResultHttpExtensions
 {
+    /// <summary>
+    /// A problem response for an error, written the same way as the failure of a result. For code that has no result to return: a
+    /// middleware that rejects a request (a missing header, a blocked client) writes
+    /// <c>await error.ToHttpResult().ExecuteAsync(context);</c> and does not call the next middleware.
+    /// </summary>
+    /// <param name="error">The error to report.</param>
+    /// <returns>The response.</returns>
+    public static IResult ToHttpResult(this Error error) => new ErrorProblemResult(error);
+
     /// <summary>
     /// A success is <c>204 No Content</c>; a failure is a problem response (see <see cref="IErrorProblemFactory"/>). The result works
     /// from a minimal API and from an MVC action, which may return an <see cref="IResult"/>.

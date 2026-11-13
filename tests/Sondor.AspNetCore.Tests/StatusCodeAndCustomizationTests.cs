@@ -48,7 +48,7 @@ public sealed partial class StatusCodeAndCustomizationTests
         await using var app = await TestApp.StartAsync(map: web =>
         {
             web.MapGet("/teapot", () => TypedResults.StatusCode(418));
-            web.MapGet("/unavailable", () => TypedResults.StatusCode(503));
+            web.MapGet("/unavailable", () => TypedResults.StatusCode(502));
         });
 
         var teapot = await Json.ReadAsync(await app.Client.GetAsync("/teapot"));
