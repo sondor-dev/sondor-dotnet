@@ -5,6 +5,9 @@
     <Project Path="src/Sondor.Cqrs.FluentValidation/Sondor.Cqrs.FluentValidation.csproj" />
     <Project Path="src/Sondor.Results/Sondor.Results.csproj" />
   </Folder>
+  <Folder Name="/benchmarks/">
+    <Project Path="benchmarks/Sondor.Cqrs.Benchmarks/Sondor.Cqrs.Benchmarks.csproj" />
+  </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/Sondor.Cqrs.Tests/Sondor.Cqrs.Tests.csproj" />
     <Project Path="tests/Sondor.Cqrs.Results.Tests/Sondor.Cqrs.Results.Tests.csproj" />
