@@ -1,3 +1,1 @@
 #nullable enable
-Sondor.Cqrs.ResultsServiceCollectionExtensions
-static Sondor.Cqrs.ResultsServiceCollectionExtensions.AddCqrsResults(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
