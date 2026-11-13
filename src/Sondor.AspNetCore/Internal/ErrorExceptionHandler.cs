@@ -20,6 +20,9 @@ internal sealed partial class ErrorExceptionHandler(
 
     private static readonly Error Unreadable = new("Request.Invalid", "The request could not be read.", ErrorType.Validation);
 
+    // Built once: every exception that is not mapped is answered with this same error, and building one formats a description.
+    private static readonly Error Unexpected = Error.Internal("process the request");
+
     public async ValueTask<bool> TryHandleAsync(HttpContext httpContext, Exception exception, CancellationToken cancellationToken)
     {
         var settings = options.Value;
@@ -31,7 +34,7 @@ internal sealed partial class ErrorExceptionHandler(
 
         exception = Unwrap(exception);
 
-        var (error, status, mapped) = Resolve(exception, httpContext, settings);
+        var (error, status, mapped, cancelled) = Resolve(exception, httpContext, settings);
 
         var factory = httpContext.RequestServices.GetService<IErrorProblemFactory>() ??
                       throw new InvalidOperationException("Call AddSondorProblemDetails() to register the error handling this application uses.");
@@ -49,7 +52,7 @@ internal sealed partial class ErrorExceptionHandler(
             problem.Extensions["exception"] = exception.GetType().FullName;
         }
 
-        Log(exception, error, problem.Status ?? StatusCodes.Status500InternalServerError, cancelled: error == Cancelled);
+        Log(exception, error, problem.Status ?? StatusCodes.Status500InternalServerError, cancelled);
 
         httpContext.Response.StatusCode = problem.Status ?? StatusCodes.Status500InternalServerError;
 
@@ -71,24 +74,24 @@ internal sealed partial class ErrorExceptionHandler(
         return true;
     }
 
-    private static (Error Error, int? Status, bool Mapped) Resolve(Exception exception, HttpContext context, ErrorResponseOptions settings)
+    private static (Error Error, int? Status, bool Mapped, bool Cancelled) Resolve(Exception exception, HttpContext context, ErrorResponseOptions settings)
     {
         if (exception is OperationCanceledException && context.RequestAborted.IsCancellationRequested)
         {
-            return (Cancelled, settings.ClientClosedRequestStatus, true);
+            return (Cancelled, settings.ClientClosedRequestStatus, true, true);
         }
 
         if (settings.Exceptions.TryMap(exception, out var mapped))
         {
-            return (mapped, null, true);
+            return (mapped, null, true, false);
         }
 
         if (exception is BadHttpRequestException bad)
         {
-            return (Unreadable, bad.StatusCode, true);
+            return (Unreadable, bad.StatusCode, true, false);
         }
 
-        return (Error.Internal("process the request"), null, false);
+        return (Unexpected, null, false, false);
     }
 
     private static Exception Unwrap(Exception exception)

@@ -1,6 +1,6 @@
+using System.Globalization;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -31,19 +31,71 @@ internal static class RequestClassifier
         return !PrefersHtml(context.Request);
     }
 
+    /// <summary>
+    /// A browser asks for <c>text/html</c> first and lists <c>*/*</c> with a lower quality; a client that lists <c>*/*</c> alone does
+    /// not prefer HTML. The header is read in place, without parsing it into objects: an unknown URL is the request a flood of bots
+    /// sends, and this runs for every one of them.
+    /// </summary>
     private static bool PrefersHtml(HttpRequest request)
     {
-        var accept = request.GetTypedHeaders().Accept;
+        var bestQuality = -1.0;
+        var bestIsHtml = false;
 
-        if (accept.Count == 0)
+        foreach (var header in request.Headers.Accept)
         {
-            return false;
+            var remaining = header.AsSpan();
+
+            while (!remaining.IsEmpty)
+            {
+                var comma = remaining.IndexOf(',');
+                var range = comma < 0 ? remaining : remaining[..comma];
+                remaining = comma < 0 ? default : remaining[(comma + 1)..];
+
+                ReadRange(range, out var mediaType, out var quality);
+
+                // Strictly greater: the first of equally preferred types wins.
+                if (!mediaType.IsEmpty && quality > bestQuality)
+                {
+                    bestQuality = quality;
+                    bestIsHtml = IsHtml(mediaType);
+                }
+            }
         }
 
-        // A browser asks for text/html first and lists */* with a lower quality; a client that lists */* alone does not prefer HTML.
-        var preferred = accept.OrderByDescending(value => value.Quality ?? 1.0).First();
-
-        return preferred.MediaType.Equals("text/html", StringComparison.OrdinalIgnoreCase) ||
-               preferred.MediaType.Equals("application/xhtml+xml", StringComparison.OrdinalIgnoreCase);
+        return bestIsHtml;
     }
+
+    private static void ReadRange(ReadOnlySpan<char> range, out ReadOnlySpan<char> mediaType, out double quality)
+    {
+        var semicolon = range.IndexOf(';');
+
+        mediaType = (semicolon < 0 ? range : range[..semicolon]).Trim();
+        quality = 1.0;
+
+        if (semicolon < 0)
+        {
+            return;
+        }
+
+        var parameters = range[(semicolon + 1)..];
+
+        while (!parameters.IsEmpty)
+        {
+            var next = parameters.IndexOf(';');
+            var parameter = (next < 0 ? parameters : parameters[..next]).Trim();
+            parameters = next < 0 ? default : parameters[(next + 1)..];
+
+            if (parameter.Length > 2 && parameter[0] is 'q' or 'Q' && parameter[1] == '=' &&
+                double.TryParse(parameter[2..], NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture, out var parsed))
+            {
+                quality = parsed;
+
+                return;
+            }
+        }
+    }
+
+    private static bool IsHtml(ReadOnlySpan<char> mediaType) =>
+        mediaType.Equals("text/html", StringComparison.OrdinalIgnoreCase) ||
+        mediaType.Equals("application/xhtml+xml", StringComparison.OrdinalIgnoreCase);
 }

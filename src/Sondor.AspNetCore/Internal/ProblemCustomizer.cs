@@ -46,7 +46,7 @@ internal static class ProblemCustomizer
 
             if (settings.TypeUriTemplate is not null && IsFrameworkType(problem.Type))
             {
-                problem.Type = Expand(settings.TypeUriTemplate, code);
+                problem.Type = TypeLinks.Expand(settings.TypeUriTemplate, code);
             }
         }
 
@@ -67,9 +67,6 @@ internal static class ProblemCustomizer
             }
         }
     }
-
-    public static string Expand(string template, string code) =>
-        template.Replace("{code}", Uri.EscapeDataString(code), StringComparison.Ordinal);
 
     private static bool HasCode(ProblemDetails problem, string member) =>
         problem.Extensions.TryGetValue(member, out var value) && value is string { Length: > 0 };

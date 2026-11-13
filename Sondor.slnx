@@ -11,6 +11,7 @@
     <Project Path="src/Sondor.Results.Localization/Sondor.Results.Localization.csproj" />
   </Folder>
   <Folder Name="/benchmarks/">
+    <Project Path="benchmarks/Sondor.AspNetCore.Benchmarks/Sondor.AspNetCore.Benchmarks.csproj" />
     <Project Path="benchmarks/Sondor.Cqrs.Benchmarks/Sondor.Cqrs.Benchmarks.csproj" />
     <Project Path="benchmarks/Sondor.Observability.Benchmarks/Sondor.Observability.Benchmarks.csproj" />
     <Project Path="benchmarks/Sondor.Options.Benchmarks/Sondor.Options.Benchmarks.csproj" />

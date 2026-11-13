@@ -11,6 +11,9 @@ internal sealed class ErrorProblemFactory(
     IEnumerable<IProblemContributor> contributors,
     IProblemTextProvider? textProvider = null) : IErrorProblemFactory
 {
+    // The container hands over an array, so a loop over it allocates no enumerator; any other sequence is copied once.
+    private readonly IProblemContributor[] _contributors = contributors as IProblemContributor[] ?? [.. contributors];
+
     public ProblemDetails Create(Error failure, HttpContext context, Exception? exception = null)
     {
         ArgumentNullException.ThrowIfNull(context);
@@ -38,14 +41,18 @@ internal sealed class ErrorProblemFactory(
 
         if (settings.TypeUriTemplate is not null)
         {
-            problem.Type = ProblemCustomizer.Expand(settings.TypeUriTemplate, failure.Code);
+            problem.Type = TypeLinks.Expand(settings.TypeUriTemplate, failure.Code);
         }
 
-        var problemContext = new ProblemContext(context, problem, failure, exception);
-
-        foreach (var contributor in contributors)
+        // Most applications register no contributor, and then there is nothing to hand them.
+        if (_contributors.Length > 0)
         {
-            contributor.Contribute(problemContext);
+            var problemContext = new ProblemContext(context, problem, failure, exception);
+
+            foreach (var contributor in _contributors)
+            {
+                contributor.Contribute(problemContext);
+            }
         }
 
         return problem;

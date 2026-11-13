@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Sondor.AspNetCore\Sondor.AspNetCore.csproj" />
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    <PackageReference Include="BenchmarkDotNet" />
+    <!-- An in-memory server, so a request costs the pipeline and not a socket. -->
+    <PackageReference Include="Microsoft.AspNetCore.TestHost" />
+    <Using Include="Sondor.Results" />
+  </ItemGroup>
+
+</Project>

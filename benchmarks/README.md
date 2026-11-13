@@ -69,3 +69,17 @@ nothing, and that a change costs the same however many came before it.
 
 A translated lookup is a few hundred nanoseconds and a handful of small allocations, on a path that already built an error, so
 read it against the cost of the failure it describes rather than against the floor.
+
+## Sondor.AspNetCore
+
+| Class | Measures |
+|---|---|
+| `ClassifierBenchmarks` | Deciding whether a request wants a problem response, which runs for every bare error status. An unknown URL has no endpoint yet, so it reads the `Accept` header: none, a browser's and a JSON client's, against an endpoint (which needs no header) and a delegate that answers without looking. |
+| `FactoryBenchmarks` | Turning an error into a problem: the defaults, with a documentation link built from the code, and with a text provider and a contributor, against the same problem written by hand. |
+| `ResultAndExceptionBenchmarks` | Writing the response for a success (with and without a value), a failed result and an exception, each against the framework doing the same by hand. Results are executed through `IResult`, not their concrete type: executing the concrete type lets the JIT place the result on the stack, which flatters the framework. |
+| `RequestBenchmarks` | Whole requests through an in-memory server (a success, an unknown URL, a failed result, an exception) against an application that uses the framework alone. Every case runs after 0 and after 10,000 earlier requests: a cost that grows with the requests already served would show as a difference between the two. |
+
+A success must cost what the framework's own result costs and allocate the same. The failure paths run on error responses only, so
+read them against the cost of the request they answer: an exception costs tens of microseconds to throw, and what the package adds
+is a few hundred nanoseconds. An unknown URL is the case to watch under load (bots), which is why the classifier reads the header
+in place and allocates nothing.

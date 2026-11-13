@@ -157,6 +157,18 @@ public sealed class OptionsAndClassifierTests
     [TestCase("text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8", false)]
     [TestCase("application/json;q=0.5, text/html", false)]
     [TestCase("text/html;q=0.5, application/json", true)]
+    [TestCase("text/html;q=0.9, application/json;q=0.8", false)]
+    [TestCase("text/html;q=0, application/json", true)]
+    [TestCase("TEXT/HTML", false)]
+    [TestCase("text/html;level=1;q=0.5, application/json;q=0.4", false)]
+    [TestCase("text/html;level=1;Q=0.5, application/json;q=0.6", true)]
+    [TestCase("text/html;q=abc, application/json;q=0.5", false)]
+    [TestCase("text/html;q=", false)]
+    [TestCase(",,text/html", false)]
+    [TestCase("  ,  ", true)]
+    [TestCase("application/*", true)]
+    [TestCase("application/json,text/html", true)]
+    [TestCase(" text/html ; q=0.5 , application/json ; q=0.4", false)]
     public void IsApiRequest_Should_ReadTheAcceptHeader_WhenThereIsNoEndpoint(string? accept, bool expected)
     {
         var context = new DefaultHttpContext();
@@ -167,6 +179,57 @@ public sealed class OptionsAndClassifierTests
         }
 
         Assert.That(RequestClassifier.IsApiRequest(context), Is.EqualTo(expected));
+    }
+
+    [Test]
+    public void IsApiRequest_Should_ReadEveryAcceptHeaderValue()
+    {
+        var context = new DefaultHttpContext();
+        context.Request.Headers.Accept = new Microsoft.Extensions.Primitives.StringValues(["application/json", "text/html;q=0.5"]);
+
+        Assert.That(RequestClassifier.IsApiRequest(context), Is.True);
+
+        context.Request.Headers.Accept = new Microsoft.Extensions.Primitives.StringValues(["application/json;q=0.2", "text/html"]);
+
+        Assert.That(RequestClassifier.IsApiRequest(context), Is.False);
+    }
+
+    [Test]
+    public void TypeLinks_Should_ExpandTheCode_AndKeepOneInstancePerLink()
+    {
+        var first = TypeLinks.Expand("https://docs.example.com/errors/{code}", "Order.Late");
+        var second = TypeLinks.Expand("https://docs.example.com/errors/{code}", "Order.Late");
+
+        Assert.That(first, Is.EqualTo("https://docs.example.com/errors/Order.Late"));
+        Assert.That(second, Is.SameAs(first));
+        Assert.That(TypeLinks.Expand("https://docs.example.com/{code}/{code}", "A B"), Is.EqualTo("https://docs.example.com/A%20B/A%20B"));
+    }
+
+    [Test]
+    public void TypeLinks_Should_StayWithinItsLimit_AndStayCorrect_ForCodesWithoutEnd()
+    {
+        for (var code = 0; code < 2_000; code++)
+        {
+            Assert.That(TypeLinks.Expand("https://docs.example.com/limit/{code}", $"Made.Up{code}"), Is.EqualTo($"https://docs.example.com/limit/Made.Up{code}"));
+        }
+
+        Assert.That(TypeLinks.Count, Is.LessThanOrEqualTo(512));
+    }
+
+    [Test]
+    public void Create_Should_RunContributors_That_ComeAsAnyKindOfSequence()
+    {
+        var contributors = new List<IProblemContributor> { new MarkingContributor() };
+        var factory = new ErrorProblemFactory(Options.Create(new ErrorResponseOptions()), contributors);
+
+        var problem = factory.Create(Error.NotFound("Order", "Id"), new DefaultHttpContext());
+
+        Assert.That(problem.Extensions["marked"], Is.EqualTo(true));
+    }
+
+    private sealed class MarkingContributor : IProblemContributor
+    {
+        public void Contribute(ProblemContext context) => context.Problem.Extensions["marked"] = true;
     }
 
     private static async Task<OptionsValidationException> StartFailingAsync(Action<ErrorResponseOptions> configure)
