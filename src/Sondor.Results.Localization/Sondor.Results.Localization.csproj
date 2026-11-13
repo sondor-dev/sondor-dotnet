@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <MinVerTagPrefix>results-localization-v</MinVerTagPrefix>
+    <Description>Translated text for a Sondor.Results Error, from the application's own resources: the title and the message in the current culture, looked up by error code, then by the general template, then the English text. Works with any IStringLocalizer store (resx, JSON, a database) and never shows request data unless told to.</Description>
+    <PackageTags>result;error-handling;localization;globalization;translation;resx;problem-details</PackageTags>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- A released version, not a project reference (see Sondor.Cqrs.Results). The pinned version is also the oldest one that works. -->
+    <PackageReference Include="Sondor.Results" />
+    <!-- Only the interfaces. The application chooses what implements them: resx through AddLocalization(), JSON, a database. -->
+    <PackageReference Include="Microsoft.Extensions.Localization.Abstractions" />
+    <PackageReference Include="Microsoft.Extensions.Options" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Sondor.Results.Localization.Tests" />
+  </ItemGroup>
+
+</Project>

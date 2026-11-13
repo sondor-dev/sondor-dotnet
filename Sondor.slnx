@@ -7,6 +7,7 @@
     <Project Path="src/Sondor.Options.FluentValidation/Sondor.Options.FluentValidation.csproj" />
     <Project Path="src/Sondor.Observability/Sondor.Observability.csproj" />
     <Project Path="src/Sondor.Results/Sondor.Results.csproj" />
+    <Project Path="src/Sondor.Results.Localization/Sondor.Results.Localization.csproj" />
   </Folder>
   <Folder Name="/benchmarks/">
     <Project Path="benchmarks/Sondor.Cqrs.Benchmarks/Sondor.Cqrs.Benchmarks.csproj" />
@@ -14,6 +15,7 @@
     <Project Path="benchmarks/Sondor.Options.Benchmarks/Sondor.Options.Benchmarks.csproj" />
     <Project Path="benchmarks/Sondor.Options.FluentValidation.Benchmarks/Sondor.Options.FluentValidation.Benchmarks.csproj" />
     <Project Path="benchmarks/Sondor.Results.Benchmarks/Sondor.Results.Benchmarks.csproj" />
+    <Project Path="benchmarks/Sondor.Results.Localization.Benchmarks/Sondor.Results.Localization.Benchmarks.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/Sondor.Cqrs.Tests/Sondor.Cqrs.Tests.csproj" />
@@ -23,5 +25,6 @@
     <Project Path="tests/Sondor.Options.FluentValidation.Tests/Sondor.Options.FluentValidation.Tests.csproj" />
     <Project Path="tests/Sondor.Observability.Tests/Sondor.Observability.Tests.csproj" />
     <Project Path="tests/Sondor.Results.Tests/Sondor.Results.Tests.csproj" />
+    <Project Path="tests/Sondor.Results.Localization.Tests/Sondor.Results.Localization.Tests.csproj" />
   </Folder>
 </Solution>
