@@ -1,7 +1,7 @@
 # sondor-dotnet
 
 Small, focused .NET libraries for building services: results and errors, in-process commands and queries, validated
-options, observability and ASP.NET Core error handling. Each package does one job, depends on as little as possible, and
+options, observability, ASP.NET Core error handling and HTTP clients. Each package does one job, depends on as little as possible, and
 is released on its own.
 
 [![CI](https://github.com/sondor-dev/sondor-dotnet/actions/workflows/ci.yml/badge.svg)](https://github.com/sondor-dev/sondor-dotnet/actions/workflows/ci.yml)
@@ -23,7 +23,7 @@ is released on its own.
 | [`Sondor.Cqrs.FluentValidation`](src/Sondor.Cqrs.FluentValidation) | FluentValidation for `Sondor.Cqrs`: validates every request before its handler | in development |
 | [`Sondor.AspNetCore`](src/Sondor.AspNetCore) | One consistent RFC 9457 problem response for an ASP.NET Core API: a failed `Result`, an unhandled exception and the framework's own bare 401 or 404 share one shape with a stable `errorCode` and a trace id. Minimal APIs and MVC | in development |
 | [`Sondor.Observability`](src/Sondor.Observability) | OpenTelemetry for services from configuration: traces, metrics and logs with one resource, OTLP export, and sampling and signals you can change while the service runs | in development |
-| `Sondor.Http` | Typed HTTP clients with resilience, returning `Result` | planned |
+| [`Sondor.Http`](src/Sondor.Http) | Read the answer of another HTTP service as a value: a failed status, a problem document, a timeout and an unreachable host become a failed `Result` with a stable error code, never an exception. Reads the `Sondor.AspNetCore` problems back, with bounded reads, per-call timeouts, an opt-in bearer token that only goes to allowed hosts, and a hook for other error formats. Built on `HttpClient` and `IHttpClientFactory` | in development |
 
 ## How the packages are put together
 

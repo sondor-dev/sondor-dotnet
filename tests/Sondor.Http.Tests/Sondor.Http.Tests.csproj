@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RunSettingsFilePath>$(MSBuildProjectDirectory)/coverage.runsettings</RunSettingsFilePath>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Sondor.Http\Sondor.Http.csproj" />
+    <!-- Test only: the real server side of the contract, so the client is proved against what the server writes. -->
+    <ProjectReference Include="..\..\src\Sondor.AspNetCore\Sondor.AspNetCore.csproj" />
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    <PackageReference Include="Microsoft.AspNetCore.TestHost" />
+    <!-- Test only: proves the README recipe for the framework resilience handlers, which this package does not depend on. -->
+    <PackageReference Include="Microsoft.Extensions.Http.Resilience" />
+    <Using Include="Sondor.Results" />
+  </ItemGroup>
+
+</Project>
