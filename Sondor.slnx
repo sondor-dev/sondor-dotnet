@@ -2,11 +2,13 @@
   <Folder Name="/src/">
     <Project Path="src/Sondor.Cqrs/Sondor.Cqrs.csproj" />
     <Project Path="src/Sondor.Cqrs.Results/Sondor.Cqrs.Results.csproj" />
+    <Project Path="src/Sondor.Cqrs.FluentValidation/Sondor.Cqrs.FluentValidation.csproj" />
     <Project Path="src/Sondor.Results/Sondor.Results.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/Sondor.Cqrs.Tests/Sondor.Cqrs.Tests.csproj" />
     <Project Path="tests/Sondor.Cqrs.Results.Tests/Sondor.Cqrs.Results.Tests.csproj" />
+    <Project Path="tests/Sondor.Cqrs.FluentValidation.Tests/Sondor.Cqrs.FluentValidation.Tests.csproj" />
     <Project Path="tests/Sondor.Results.Tests/Sondor.Results.Tests.csproj" />
   </Folder>
 </Solution>

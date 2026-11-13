@@ -1,0 +1,5 @@
+#nullable enable
+Sondor.Cqrs.CqrsValidation
+Sondor.Cqrs.FluentValidationBuilderExtensions
+const Sondor.Cqrs.CqrsValidation.ErrorCode = "Validation.Failed" -> string!
+static Sondor.Cqrs.FluentValidationBuilderExtensions.UseFluentValidation(this Sondor.Cqrs.CqrsBuilder! builder) -> Sondor.Cqrs.CqrsBuilder!
