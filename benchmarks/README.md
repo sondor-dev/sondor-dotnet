@@ -52,3 +52,10 @@ nothing, and that a change costs the same however many came before it.
 | Class | Measures |
 |---|---|
 | `ValidationBenchmarks` | A configuration change, and a snapshot built in a new scope, validated with FluentValidation against the same three checks written as a `Validate` delegate. Each validation resolves the validator from a scope of its own, so the question is what that costs and that it does not grow: every case runs after 0 and after 10,000 earlier changes. |
+
+## Sondor.Observability
+
+| Class | Measures |
+|---|---|
+| `SpanBenchmarks` | Starting and ending one span with the OpenTelemetry SDK set up by hand, against Sondor.Observability with a sampling ratio of 1, with a ratio of 0, and with traces off. Nothing is exported, so this is the sampler and listener cost every span pays. |
+| `ReloadBenchmarks` | One sampling ratio change, and one span afterwards. Every case runs after 0 and after 10,000 earlier changes: a listener or a sampler left behind by each change would show as a difference between the two. |

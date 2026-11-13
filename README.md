@@ -21,7 +21,7 @@ is released on its own.
 | [`Sondor.Cqrs.Results`](src/Sondor.Cqrs.Results) | `Sondor.Results` support for `Sondor.Cqrs`: failed results show up as failures in traces, metrics and logs | in development |
 | [`Sondor.Cqrs.FluentValidation`](src/Sondor.Cqrs.FluentValidation) | FluentValidation for `Sondor.Cqrs`: validates every request before its handler | in development |
 | `Sondor.AspNetCore` | `Result` to RFC 9457 problem details, with `errorCode` and `traceId` | planned |
-| `Sondor.Observability` | OpenTelemetry setup for services | planned |
+| [`Sondor.Observability`](src/Sondor.Observability) | OpenTelemetry for services from configuration: traces, metrics and logs with one resource, OTLP export, and sampling and signals you can change while the service runs | in development |
 | `Sondor.Http` | Typed HTTP clients with resilience, returning `Result` | planned |
 
 ## How the packages are put together

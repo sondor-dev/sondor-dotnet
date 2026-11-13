@@ -5,10 +5,12 @@
     <Project Path="src/Sondor.Cqrs.FluentValidation/Sondor.Cqrs.FluentValidation.csproj" />
     <Project Path="src/Sondor.Options/Sondor.Options.csproj" />
     <Project Path="src/Sondor.Options.FluentValidation/Sondor.Options.FluentValidation.csproj" />
+    <Project Path="src/Sondor.Observability/Sondor.Observability.csproj" />
     <Project Path="src/Sondor.Results/Sondor.Results.csproj" />
   </Folder>
   <Folder Name="/benchmarks/">
     <Project Path="benchmarks/Sondor.Cqrs.Benchmarks/Sondor.Cqrs.Benchmarks.csproj" />
+    <Project Path="benchmarks/Sondor.Observability.Benchmarks/Sondor.Observability.Benchmarks.csproj" />
     <Project Path="benchmarks/Sondor.Options.Benchmarks/Sondor.Options.Benchmarks.csproj" />
     <Project Path="benchmarks/Sondor.Options.FluentValidation.Benchmarks/Sondor.Options.FluentValidation.Benchmarks.csproj" />
     <Project Path="benchmarks/Sondor.Results.Benchmarks/Sondor.Results.Benchmarks.csproj" />
@@ -19,6 +21,7 @@
     <Project Path="tests/Sondor.Cqrs.FluentValidation.Tests/Sondor.Cqrs.FluentValidation.Tests.csproj" />
     <Project Path="tests/Sondor.Options.Tests/Sondor.Options.Tests.csproj" />
     <Project Path="tests/Sondor.Options.FluentValidation.Tests/Sondor.Options.FluentValidation.Tests.csproj" />
+    <Project Path="tests/Sondor.Observability.Tests/Sondor.Observability.Tests.csproj" />
     <Project Path="tests/Sondor.Results.Tests/Sondor.Results.Tests.csproj" />
   </Folder>
 </Solution>

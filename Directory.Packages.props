@@ -19,6 +19,8 @@
     <PackageVersion Include="Sondor.Options" Version="2.0.0-preview.1" />
     <PackageVersion Include="Sondor.Results" Version="0.1.1" />
     <PackageVersion Include="FluentValidation" Version="12.2.0" />
+    <PackageVersion Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.21.0" />
+    <PackageVersion Include="OpenTelemetry.Extensions.Hosting" Version="1.21.0" />
   </ItemGroup>
 
   <ItemGroup Label="Benchmarks">
@@ -33,5 +35,6 @@
     <PackageVersion Include="NUnit3TestAdapter" Version="6.3.1" />
     <PackageVersion Include="NUnit.Analyzers" Version="4.15.0" />
     <PackageVersion Include="coverlet.collector" Version="10.1.0" />
+    <PackageVersion Include="Testcontainers" Version="4.16.0" />
   </ItemGroup>
 </Project>
