@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <MinVerTagPrefix>cqrs-fluentvalidation-v</MinVerTagPrefix>
+    <Description>FluentValidation for Sondor.Cqrs: validates every request before its handler and refuses an invalid one, without a result type or an exception, as your response type allows.</Description>
+    <PackageTags>cqrs;mediator;fluentvalidation;validation;pipeline</PackageTags>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Released versions, not project references (see Sondor.Cqrs.Results). -->
+    <PackageReference Include="Sondor.Cqrs" />
+    <PackageReference Include="FluentValidation" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Sondor.Cqrs.FluentValidation.Tests" />
+  </ItemGroup>
+
+</Project>

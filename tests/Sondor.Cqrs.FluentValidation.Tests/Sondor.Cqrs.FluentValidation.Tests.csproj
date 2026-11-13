@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RunSettingsFilePath>$(MSBuildProjectDirectory)/coverage.runsettings</RunSettingsFilePath>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Sondor.Cqrs.FluentValidation\Sondor.Cqrs.FluentValidation.csproj" />
+    <!-- The adapter for Result, to prove validation works with it. Only the tests use it, so it adds nothing to the package. -->
+    <ProjectReference Include="..\..\src\Sondor.Cqrs.Results\Sondor.Cqrs.Results.csproj" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
+  </ItemGroup>
+
+</Project>
