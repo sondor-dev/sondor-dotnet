@@ -15,7 +15,7 @@ is released on its own.
 | Package | What it is | Status |
 |---|---|---|
 | [`Sondor.Results`](src/Sondor.Results) | `Result`, `Result<T>` and `Error`: failures as values, with stable `Area.Reason` codes | in development |
-| `Sondor.Options` | Options bound from configuration, validated at start-up | planned |
+| [`Sondor.Options`](src/Sondor.Options) | Options bound from configuration by convention and validated at start-up; required or optional sections; a bad configuration reload keeps the last valid options | in development |
 | [`Sondor.Cqrs`](src/Sondor.Cqrs) | In-process commands, queries and notifications with an opt-in pipeline (tracing, metrics, logging). No third-party dependencies | in development |
 | [`Sondor.Cqrs.Results`](src/Sondor.Cqrs.Results) | `Sondor.Results` support for `Sondor.Cqrs`: failed results show up as failures in traces, metrics and logs | in development |
 | [`Sondor.Cqrs.FluentValidation`](src/Sondor.Cqrs.FluentValidation) | FluentValidation for `Sondor.Cqrs`: validates every request before its handler | in development |
