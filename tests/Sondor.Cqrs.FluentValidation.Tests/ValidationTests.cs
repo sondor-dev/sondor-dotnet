@@ -307,7 +307,7 @@ public sealed class ValidationTests
         public ValueTask<TResponse> Handle(TRequest request, RequestContinuation<TResponse> continuation, CancellationToken cancellationToken)
         {
             recorder.Outer++;
-            return continuation();
+            return continuation.Invoke();
         }
     }
 }
