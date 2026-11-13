@@ -1,3 +1,5 @@
+using Microsoft.Extensions.Logging;
+
 namespace Sondor.Observability;
 
 /// <summary>What a signal does with the telemetry it produces.</summary>
@@ -54,6 +56,9 @@ public sealed class ObservabilityOptions
 
     /// <summary>OTLP export. It switches on when an endpoint is configured here or by the standard <c>OTEL_EXPORTER_OTLP_*</c> variables.</summary>
     public OtlpOptions Otlp { get; init; } = new();
+
+    /// <summary>What the OpenTelemetry SDK's own diagnostics (a failed export, a refused connection) are logged at. Reloads live.</summary>
+    public DiagnosticsOptions Diagnostics { get; init; } = new();
 }
 
 /// <summary>The settings every signal has.</summary>
@@ -101,4 +106,17 @@ public sealed class OtlpOptions
 
     /// <summary>How long one export may take. Ten seconds unless set.</summary>
     public TimeSpan? Timeout { get; init; }
+}
+
+/// <summary>Diagnostics settings.</summary>
+public sealed class DiagnosticsOptions
+{
+    /// <summary>
+    /// The least severe SDK diagnostic that is logged, through the <c>Sondor.Observability.Diagnostics</c> logger category.
+    /// <see cref="LogLevel.Warning"/> unless set, so a failing export is visible without any setup; <see cref="LogLevel.Debug"/>
+    /// shows everything the SDK reports; <see cref="LogLevel.None"/> turns it off. Reloads live, so it can be raised on a running
+    /// service while a problem is chased. These logs never go to the OpenTelemetry log exporter: a failing export would log
+    /// about itself forever.
+    /// </summary>
+    public LogLevel Level { get; init; } = LogLevel.Warning;
 }

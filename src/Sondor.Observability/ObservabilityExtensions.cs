@@ -1,6 +1,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using OpenTelemetry;
 using OpenTelemetry.Logs;
@@ -58,6 +59,15 @@ public static class ObservabilityExtensions
         services.TryAddSingleton(provider => new OtlpExporters(
             ResolveOtlp(provider),
             provider.GetRequiredService<LiveSettings>()));
+
+        services.TryAddSingleton(new Registered(serviceName, [.. builder.Sources], [.. builder.Meters]));
+        services.AddHostedService<DiagnosticsService>();
+
+        // The SDK's diagnostics must not reach the OpenTelemetry log exporter: a failing export would log about itself forever.
+        // Diagnostics:Level decides what is forwarded, so the logging filters let everything of this category through.
+        services.AddLogging(logging => logging
+            .AddFilter(DiagnosticsCategory.Name, LogLevel.Trace)
+            .AddFilter<OpenTelemetryLoggerProvider>(DiagnosticsCategory.Name, LogLevel.None));
 
         builder.OpenTelemetry.WithTracing().WithMetrics();
 

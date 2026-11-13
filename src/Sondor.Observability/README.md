@@ -57,6 +57,7 @@ Section `Observability` (or the one you name). Everything is optional.
 | `Traces:ExcludeSources` | Activity sources whose spans are not exported. | live |
 | `Version`, `Environment`, `InstanceId` | Resource. Defaults: the entry assembly's version, the host's environment name, a new GUID per process. | startup |
 | `ResourceAttributes:<key>` | Extra resource attributes. | startup |
+| `Diagnostics:Level` | What the SDK's own diagnostics are logged at: `Warning` (default), `Debug` for everything, `None` for off. See [When traces do not arrive](#when-traces-do-not-arrive). | live |
 | `Otlp:Endpoint`, `Protocol`, `Headers`, `HeadersFile`, `Timeout` | OTLP export. `Protocol` is `Grpc` (default) or `HttpProtobuf`. | startup |
 
 What each mode does:
@@ -117,6 +118,26 @@ You do not have to move everything at once. A typical path:
    and your current exporters (added through the builder) keep running.
 2. Send one signal over OTLP (for example traces) and leave the others where they are, using each signal's mode.
 3. When ready, send everything over OTLP to a collector and let the collector fan out to your backends.
+
+## When traces do not arrive
+
+The OpenTelemetry SDK reports its own problems (a refused connection, a rejected key, a full queue) only through internal
+event sources, which is why they are so easy to miss. This package turns them into ordinary logs, and says what it set up.
+
+- **SDK diagnostics are logged, by default at `Warning`.** A failing export shows up under the logger category
+  `Sondor.Observability.Diagnostics`, for example `OpenTelemetry-Exporter-OpenTelemetryProtocol: ... connection refused`.
+  Set `Observability:Diagnostics:Level` to `Debug` to see everything the SDK reports, or `None` to switch it off. It reloads
+  live, so you can raise it on a running service while you chase a problem. These logs go to your other log providers (console,
+  files) and **never to the OTLP log exporter**: a failing export would otherwise log about itself for ever.
+- **A start-up summary is logged once** (category `Sondor.Observability`, Information): the service name, each signal's mode,
+  the sampling ratio, whether OTLP is configured and where it sends (the address only, never credentials or headers), and the
+  sources and meters being listened to. Most "no traces" cases are visible there: a source that was never added with
+  `AddSource`, a signal that is `Off`, or no endpoint.
+- **A change to the live settings is logged** when a reload alters a mode, the ratio, the excluded sources or the diagnostics
+  level, so a cost change made in your configuration store leaves a trail. A reload that is rejected as invalid is logged by
+  `Sondor.Options`.
+
+The SDK's own `OTEL_DIAGNOSTICS.json` file still works if you prefer it.
 
 ## Logs
 

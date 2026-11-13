@@ -8,7 +8,7 @@ internal sealed class OtlpExporters(OtlpSettings? settings, LiveSettings live)
     private const int MetricExportIntervalMilliseconds = 60_000;
     private const int MetricExportTimeoutMilliseconds = 30_000;
 
-    public bool IsConfigured => settings is not null;
+    public OtlpSettings? Settings => settings;
 
     public GatedActivityProcessor? Traces() =>
         settings is null ? null : new GatedActivityProcessor(new OtlpTraceExporter(Options("traces")), live);

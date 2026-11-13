@@ -34,6 +34,11 @@ internal sealed class OptionsValidator(Ambient ambient) : IValidateOptions<Obser
             problems.Add("ResourceAttributes must not hold an empty key.");
         }
 
+        if (!Enum.IsDefined(options.Diagnostics.Level))
+        {
+            problems.Add("Diagnostics:Level must be a log level: Trace, Debug, Information, Warning, Error, Critical or None.");
+        }
+
         _ = OtlpSettings.Resolve(options.Otlp, ambient, problems);
 
         return problems.Count == 0 ? ValidateOptionsResult.Success : ValidateOptionsResult.Fail(problems);

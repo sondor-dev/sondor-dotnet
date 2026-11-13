@@ -1,4 +1,8 @@
 #nullable enable
+Sondor.Observability.DiagnosticsOptions
+Sondor.Observability.DiagnosticsOptions.DiagnosticsOptions() -> void
+Sondor.Observability.DiagnosticsOptions.Level.get -> Microsoft.Extensions.Logging.LogLevel
+Sondor.Observability.DiagnosticsOptions.Level.init -> void
 Sondor.Observability.ObservabilityBuilder
 Sondor.Observability.ObservabilityBuilder.AddMeter(params string![]! names) -> Sondor.Observability.ObservabilityBuilder!
 Sondor.Observability.ObservabilityBuilder.AddSource(params string![]! names) -> Sondor.Observability.ObservabilityBuilder!
@@ -14,6 +18,8 @@ Sondor.Observability.ObservabilityBuilder.WithTracing(System.Action<OpenTelemetr
 Sondor.Observability.ObservabilityBuilder.WithVersion(string! version) -> Sondor.Observability.ObservabilityBuilder!
 Sondor.Observability.ObservabilityExtensions
 Sondor.Observability.ObservabilityOptions
+Sondor.Observability.ObservabilityOptions.Diagnostics.get -> Sondor.Observability.DiagnosticsOptions!
+Sondor.Observability.ObservabilityOptions.Diagnostics.init -> void
 Sondor.Observability.ObservabilityOptions.Environment.get -> string?
 Sondor.Observability.ObservabilityOptions.Environment.init -> void
 Sondor.Observability.ObservabilityOptions.InstanceId.get -> string?
