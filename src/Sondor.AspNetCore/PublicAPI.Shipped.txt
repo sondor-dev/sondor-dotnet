@@ -1,1 +1,61 @@
 #nullable enable
+override Sondor.AspNetCore.ProblemText.GetHashCode() -> int
+Sondor.AspNetCore.ErrorResponseExtensions
+Sondor.AspNetCore.ErrorResponseOptions
+Sondor.AspNetCore.ErrorResponseOptions.AppliesTo.get -> System.Func<Microsoft.AspNetCore.Http.HttpContext!, bool>!
+Sondor.AspNetCore.ErrorResponseOptions.AppliesTo.set -> void
+Sondor.AspNetCore.ErrorResponseOptions.BareTraceId.get -> bool
+Sondor.AspNetCore.ErrorResponseOptions.BareTraceId.set -> void
+Sondor.AspNetCore.ErrorResponseOptions.ClientClosedRequestStatus.get -> int
+Sondor.AspNetCore.ErrorResponseOptions.ClientClosedRequestStatus.set -> void
+Sondor.AspNetCore.ErrorResponseOptions.CodeByStatus.get -> System.Collections.Generic.IDictionary<int, string!>!
+Sondor.AspNetCore.ErrorResponseOptions.ErrorCodeMember.get -> string!
+Sondor.AspNetCore.ErrorResponseOptions.ErrorCodeMember.set -> void
+Sondor.AspNetCore.ErrorResponseOptions.ErrorResponseOptions() -> void
+Sondor.AspNetCore.ErrorResponseOptions.Exceptions.get -> Sondor.AspNetCore.ExceptionMappings!
+Sondor.AspNetCore.ErrorResponseOptions.HandleExceptions.get -> bool
+Sondor.AspNetCore.ErrorResponseOptions.HandleExceptions.set -> void
+Sondor.AspNetCore.ErrorResponseOptions.IncludeExceptionDetails.get -> bool
+Sondor.AspNetCore.ErrorResponseOptions.IncludeExceptionDetails.set -> void
+Sondor.AspNetCore.ErrorResponseOptions.StatusByCode.get -> System.Collections.Generic.IDictionary<string!, int>!
+Sondor.AspNetCore.ErrorResponseOptions.StatusByType.get -> System.Collections.Generic.IDictionary<Sondor.Results.ErrorType, int>!
+Sondor.AspNetCore.ErrorResponseOptions.TagActivity.get -> bool
+Sondor.AspNetCore.ErrorResponseOptions.TagActivity.set -> void
+Sondor.AspNetCore.ErrorResponseOptions.TypeUriTemplate.get -> string?
+Sondor.AspNetCore.ErrorResponseOptions.TypeUriTemplate.set -> void
+Sondor.AspNetCore.ErrorResponseOptions.WriteStatusCodeBodies.get -> bool
+Sondor.AspNetCore.ErrorResponseOptions.WriteStatusCodeBodies.set -> void
+Sondor.AspNetCore.ExceptionMappings
+Sondor.AspNetCore.ExceptionMappings.ExceptionMappings() -> void
+Sondor.AspNetCore.ExceptionMappings.Map<TException>(System.Func<TException!, Sondor.Results.Error>! map) -> Sondor.AspNetCore.ExceptionMappings!
+Sondor.AspNetCore.IErrorProblemFactory
+Sondor.AspNetCore.IErrorProblemFactory.Create(Sondor.Results.Error failure, Microsoft.AspNetCore.Http.HttpContext! context, System.Exception? exception = null) -> Microsoft.AspNetCore.Mvc.ProblemDetails!
+Sondor.AspNetCore.IProblemContributor
+Sondor.AspNetCore.IProblemContributor.Contribute(Sondor.AspNetCore.ProblemContext! context) -> void
+Sondor.AspNetCore.IProblemTextProvider
+Sondor.AspNetCore.IProblemTextProvider.GetText(Sondor.Results.Error failure, Microsoft.AspNetCore.Http.HttpContext! context) -> Sondor.AspNetCore.ProblemText?
+Sondor.AspNetCore.ProblemContext
+Sondor.AspNetCore.ProblemContext.Error.get -> Sondor.Results.Error
+Sondor.AspNetCore.ProblemContext.Exception.get -> System.Exception?
+Sondor.AspNetCore.ProblemContext.HttpContext.get -> Microsoft.AspNetCore.Http.HttpContext!
+Sondor.AspNetCore.ProblemContext.Problem.get -> Microsoft.AspNetCore.Mvc.ProblemDetails!
+Sondor.AspNetCore.ProblemContext.ProblemContext(Microsoft.AspNetCore.Http.HttpContext! httpContext, Microsoft.AspNetCore.Mvc.ProblemDetails! problem, Sondor.Results.Error error, System.Exception? exception = null) -> void
+Sondor.AspNetCore.ProblemText
+Sondor.AspNetCore.ProblemText.Deconstruct(out string! Title, out string! Detail) -> void
+Sondor.AspNetCore.ProblemText.Detail.get -> string!
+Sondor.AspNetCore.ProblemText.Detail.init -> void
+Sondor.AspNetCore.ProblemText.Equals(Sondor.AspNetCore.ProblemText other) -> bool
+Sondor.AspNetCore.ProblemText.ProblemText() -> void
+Sondor.AspNetCore.ProblemText.ProblemText(string! Title, string! Detail) -> void
+Sondor.AspNetCore.ProblemText.Title.get -> string!
+Sondor.AspNetCore.ProblemText.Title.init -> void
+Sondor.AspNetCore.ResultHttpExtensions
+static Sondor.AspNetCore.ErrorResponseExtensions.AddSondorProblemDetails(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, System.Action<Sondor.AspNetCore.ErrorResponseOptions!>? configure = null) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
+static Sondor.AspNetCore.ErrorResponseExtensions.UseSondorProblemDetails(this Microsoft.AspNetCore.Builder.IApplicationBuilder! app) -> Microsoft.AspNetCore.Builder.IApplicationBuilder!
+static Sondor.AspNetCore.ProblemText.operator !=(Sondor.AspNetCore.ProblemText left, Sondor.AspNetCore.ProblemText right) -> bool
+static Sondor.AspNetCore.ProblemText.operator ==(Sondor.AspNetCore.ProblemText left, Sondor.AspNetCore.ProblemText right) -> bool
+static Sondor.AspNetCore.ResultHttpExtensions.ToHttpResult(this Sondor.Results.Result result) -> Microsoft.AspNetCore.Http.IResult!
+static Sondor.AspNetCore.ResultHttpExtensions.ToHttpResult<T>(this Sondor.Results.Result<T> result, System.Func<T, Microsoft.AspNetCore.Http.IResult!>? onSuccess = null) -> Microsoft.AspNetCore.Http.IResult!
+~override Sondor.AspNetCore.ProblemText.Equals(object obj) -> bool
+~override Sondor.AspNetCore.ProblemText.ToString() -> string
+static Sondor.AspNetCore.ResultHttpExtensions.ToHttpResult(this Sondor.Results.Error error) -> Microsoft.AspNetCore.Http.IResult!
