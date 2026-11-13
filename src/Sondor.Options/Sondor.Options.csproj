@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <MinVerTagPrefix>options-v</MinVerTagPrefix>
+    <Description>Options bound from a configuration section by convention, validated when the host starts. A section can be required or optional, so a feature switches on by being configured. Works with IOptions, IOptionsSnapshot and IOptionsMonitor, and with configuration that reloads.</Description>
+    <PackageTags>options;configuration;validation;feature-flags;appconfiguration</PackageTags>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Sondor.Options.Tests" />
+  </ItemGroup>
+
+</Project>

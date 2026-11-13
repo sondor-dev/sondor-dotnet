@@ -36,3 +36,13 @@ repository does not reference other mediator libraries.
 A result is a struct, so the allocation column is expected to be empty, except where a lambda captures a variable. Several of
 these operations take a nanosecond or two, which BenchmarkDotNet can only estimate: read them as "a few nanoseconds", not as
 exact ratios against the bare value, which the compiler folds away.
+
+## Sondor.Options
+
+| Class | Measures |
+|---|---|
+| `BindAndValidateBenchmarks` | Registering, building and first reading options, and every later read (`IOptions`, `IOptionsMonitor`, `IOptionsSnapshot` per scope, an optional section that is absent), each against the framework's own `AddOptions().BindConfiguration().ValidateOnStart()`. |
+| `ReloadBenchmarks` | One configuration change (what an Azure App Configuration refresh causes) rebuilding the options, against the framework, and a change that is rejected in favour of the last valid options. Every case runs after 0 and after 10,000 earlier changes: a cost that grows with the changes already seen would show as a difference between the two. |
+
+Sondor.Options replaces the options factory, so what has to hold is that a read costs what the framework's costs and allocates
+nothing, and that a change costs the same however many came before it.
