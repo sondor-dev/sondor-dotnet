@@ -16,7 +16,7 @@
     <PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.15" />
     <PackageVersion Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="10.0.15" />
     <PackageVersion Include="Sondor.Cqrs" Version="0.2.0" />
-    <PackageVersion Include="Sondor.Options" Version="2.0.0-preview.1" />
+    <PackageVersion Include="Sondor.Options" Version="2.0.0" />
     <PackageVersion Include="Sondor.Results" Version="0.1.1" />
     <PackageVersion Include="FluentValidation" Version="12.2.0" />
     <PackageVersion Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.21.0" />
