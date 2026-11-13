@@ -66,8 +66,8 @@ public sealed class RetryBehavior<TRequest, TResponse> : IPipelineBehavior<TRequ
 {
     public async ValueTask<TResponse> Handle(TRequest request, RequestContinuation<TResponse> continuation, CancellationToken ct)
     {
-        try { return await continuation(); }
-        catch (TimeoutException) { return await continuation(); }     // may be called more than once, or not at all
+        try { return await continuation.Invoke(); }
+        catch (TimeoutException) { return await continuation.Invoke(); }     // may be called more than once, or not at all
     }
 }
 

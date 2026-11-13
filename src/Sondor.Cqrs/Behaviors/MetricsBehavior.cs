@@ -11,7 +11,7 @@ internal sealed class MetricsBehavior<TRequest, TResponse>(IOutcomeReader<TRespo
     public ValueTask<TResponse> Handle(TRequest request, RequestContinuation<TResponse> continuation, CancellationToken cancellationToken) =>
         Diagnostics.Requests.Enabled || Diagnostics.Duration.Enabled
             ? Measured(continuation, cancellationToken)
-            : continuation();
+            : continuation.Invoke();
 
     private async ValueTask<TResponse> Measured(RequestContinuation<TResponse> continuation, CancellationToken cancellationToken)
     {
@@ -20,7 +20,7 @@ internal sealed class MetricsBehavior<TRequest, TResponse>(IOutcomeReader<TRespo
 
         try
         {
-            var response = await continuation().ConfigureAwait(false);
+            var response = await continuation.Invoke().ConfigureAwait(false);
 
             outcome = (outcomeReader?.Read(response) ?? RequestOutcome.Success).IsSuccess ? Diagnostics.Success : Diagnostics.Failure;
 

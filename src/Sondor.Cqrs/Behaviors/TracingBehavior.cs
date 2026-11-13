@@ -11,7 +11,7 @@ internal sealed class TracingBehavior<TRequest, TResponse>(IOutcomeReader<TRespo
     public ValueTask<TResponse> Handle(TRequest request, RequestContinuation<TResponse> continuation, CancellationToken cancellationToken) =>
         Diagnostics.Source.HasListeners()
             ? Traced(continuation, cancellationToken)
-            : continuation();
+            : continuation.Invoke();
 
     private async ValueTask<TResponse> Traced(RequestContinuation<TResponse> continuation, CancellationToken cancellationToken)
     {
@@ -23,7 +23,7 @@ internal sealed class TracingBehavior<TRequest, TResponse>(IOutcomeReader<TRespo
         if (activity is null)
         {
             // Something listens, but not to this span.
-            return await continuation().ConfigureAwait(false);
+            return await continuation.Invoke().ConfigureAwait(false);
         }
 
         activity.SetTag(Diagnostics.RequestTag, typeof(TRequest).FullName);
@@ -31,7 +31,7 @@ internal sealed class TracingBehavior<TRequest, TResponse>(IOutcomeReader<TRespo
 
         try
         {
-            var response = await continuation().ConfigureAwait(false);
+            var response = await continuation.Invoke().ConfigureAwait(false);
 
             var outcome = outcomeReader?.Read(response) ?? RequestOutcome.Success;
 

@@ -1,3 +1,5 @@
+using Sondor.Cqrs.Internal;
+
 namespace Sondor.Cqrs;
 
 /// <summary>Sends a request to its handler, through the pipeline.</summary>
@@ -25,12 +27,33 @@ public interface IPublisher
 }
 
 /// <summary>
-/// The rest of a request's pipeline, from the point of view of a behaviour: calling it runs the next behaviour, or the handler
-/// when there is none left. A behaviour may call it once, several times (a retry) or not at all (a refusal).
+/// The rest of a request's pipeline, from the point of view of a behaviour: <see cref="Invoke"/> runs the next behaviour, or the
+/// handler when there is none left. A behaviour may invoke it once, several times (a retry) or not at all (a refusal).
 /// </summary>
+/// <remarks>
+/// A small value, not a delegate: a pipeline of any length is one allocation for the request, not an object and a delegate for
+/// each behaviour. It can be copied and kept across an <c>await</c>. A <c>default</c> one is not part of any pipeline.
+/// </remarks>
 /// <typeparam name="TResponse">The response type.</typeparam>
-/// <returns>The response.</returns>
-public delegate ValueTask<TResponse> RequestContinuation<TResponse>();
+#pragma warning disable CA1815 // Override equals and operator equals on value types: it is never compared, it is only invoked.
+public readonly struct RequestContinuation<TResponse>
+#pragma warning restore CA1815
+{
+    private readonly RequestPipeline<TResponse>? _pipeline;
+    private readonly int _next;
+
+    internal RequestContinuation(RequestPipeline<TResponse> pipeline, int next)
+    {
+        _pipeline = pipeline;
+        _next = next;
+    }
+
+    /// <summary>Runs the rest of the pipeline.</summary>
+    /// <returns>The response.</returns>
+    /// <exception cref="InvalidOperationException">This is a <c>default</c> value, not one a behaviour was given.</exception>
+    public ValueTask<TResponse> Invoke() =>
+        (_pipeline ?? throw new InvalidOperationException("This continuation is not part of a pipeline: use the one the behaviour was given.")).Run(_next);
+}
 
 /// <summary>
 /// Code that runs around every request of a kind: tracing, validation, caching, auditing. Behaviours run in the order they were

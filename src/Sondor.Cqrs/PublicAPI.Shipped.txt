@@ -28,7 +28,7 @@ Sondor.Cqrs.INotificationPublisher.Publish<TNotification>(System.Collections.Gen
 Sondor.Cqrs.IOutcomeReader<TResponse>
 Sondor.Cqrs.IOutcomeReader<TResponse>.Read(TResponse response) -> Sondor.Cqrs.RequestOutcome
 Sondor.Cqrs.IPipelineBehavior<TRequest, TResponse>
-Sondor.Cqrs.IPipelineBehavior<TRequest, TResponse>.Handle(TRequest request, Sondor.Cqrs.RequestContinuation<TResponse>! continuation, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.ValueTask<TResponse>
+Sondor.Cqrs.IPipelineBehavior<TRequest, TResponse>.Handle(TRequest request, Sondor.Cqrs.RequestContinuation<TResponse> continuation, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.ValueTask<TResponse>
 Sondor.Cqrs.IPublisher
 Sondor.Cqrs.IPublisher.Publish(Sondor.Cqrs.INotification! notification, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.ValueTask
 Sondor.Cqrs.IQuery<TResponse>
@@ -86,7 +86,8 @@ static Sondor.Cqrs.ServiceCollectionExtensions.AddCqrs(this Microsoft.Extensions
 static Sondor.Cqrs.Unit.Value.get -> Sondor.Cqrs.Unit
 static Sondor.Cqrs.Unit.operator !=(Sondor.Cqrs.Unit left, Sondor.Cqrs.Unit right) -> bool
 static Sondor.Cqrs.Unit.operator ==(Sondor.Cqrs.Unit left, Sondor.Cqrs.Unit right) -> bool
-virtual Sondor.Cqrs.RequestContinuation<TResponse>.Invoke() -> System.Threading.Tasks.ValueTask<TResponse>
+Sondor.Cqrs.RequestContinuation<TResponse>.Invoke() -> System.Threading.Tasks.ValueTask<TResponse>
+Sondor.Cqrs.RequestContinuation<TResponse>.RequestContinuation() -> void
 ~override Sondor.Cqrs.RequestFailure.Equals(object obj) -> bool
 ~override Sondor.Cqrs.RequestFailure.ToString() -> string
 ~override Sondor.Cqrs.RequestOutcome.Equals(object obj) -> bool

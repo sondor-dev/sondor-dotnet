@@ -24,6 +24,24 @@ public sealed class LoggingTests
     }
 
     [Test]
+    public async Task The_Logger_Should_Be_Asked_For_Once_And_Not_For_Every_Request()
+    {
+        var log = new CapturingLoggerFactory();
+        await using var provider = Build(log);
+        var sender = provider.GetRequiredService<ISender>();
+
+        await sender.Send(new Ping("a"));
+        await sender.Send(new Ping("b"));
+        await sender.Send(new Ping("c"));
+
+        using (Assert.EnterMultipleScope())
+        {
+            Assert.That(log.Entries, Has.Count.EqualTo(3));
+            Assert.That(log.Categories, Has.Count.EqualTo(1));
+        }
+    }
+
+    [Test]
     public async Task The_Request_Itself_Should_Never_Be_Logged()
     {
         var log = new CapturingLoggerFactory();

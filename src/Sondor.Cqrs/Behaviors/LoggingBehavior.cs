@@ -8,16 +8,25 @@ namespace Sondor.Cqrs.Behaviors;
 internal sealed record LoggingSettings(TimeSpan SlowRequestThreshold);
 
 /// <summary>
+/// The one logger of the logging behaviour. A behaviour is built for every request, and asking the logger factory for a logger
+/// takes a lock and a lookup, so it is asked once, here, and the behaviour only reads it.
+/// </summary>
+internal sealed class CqrsLogger(ILoggerFactory loggerFactory)
+{
+    public ILogger Logger { get; } = loggerFactory.CreateLogger(CqrsTelemetry.SourceName);
+}
+
+/// <summary>
 /// Logs every request: what it was, how long it took and how it ended. Never the request itself: a request can hold a
 /// password or a token, and a log is read by far more people than the code is.
 /// </summary>
-internal sealed partial class LoggingBehavior<TRequest, TResponse>(ILoggerFactory loggerFactory,
+internal sealed partial class LoggingBehavior<TRequest, TResponse>(CqrsLogger log,
     LoggingSettings settings,
     IOutcomeReader<TResponse>? outcomeReader = null) :
     IPipelineBehavior<TRequest, TResponse>
     where TRequest : IRequest<TResponse>
 {
-    private readonly ILogger _logger = loggerFactory.CreateLogger(CqrsTelemetry.SourceName);
+    private readonly ILogger _logger = log.Logger;
 
     public async ValueTask<TResponse> Handle(TRequest request, RequestContinuation<TResponse> continuation, CancellationToken cancellationToken)
     {
@@ -25,7 +34,7 @@ internal sealed partial class LoggingBehavior<TRequest, TResponse>(ILoggerFactor
 
         try
         {
-            var response = await continuation().ConfigureAwait(false);
+            var response = await continuation.Invoke().ConfigureAwait(false);
 
             var elapsed = Stopwatch.GetElapsedTime(started);
             var outcome = outcomeReader?.Read(response) ?? RequestOutcome.Success;

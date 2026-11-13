@@ -34,7 +34,7 @@ internal sealed class PassThroughBehavior<TRequest, TResponse> : IPipelineBehavi
     where TRequest : IRequest<TResponse>
 {
     public ValueTask<TResponse> Handle(TRequest request, RequestContinuation<TResponse> continuation, CancellationToken cancellationToken) =>
-        continuation();
+        continuation.Invoke();
 }
 
 internal static class Containers

@@ -18,8 +18,9 @@ Pick one scenario with a filter, for example `--filter "*Benchmarks.RequestBench
 | `ObservedRequestBenchmarks` | The built-in tracing and metrics while a listener records every span and measurement. Its own class, because listeners are process-wide. |
 | `NotificationBenchmarks` | `Publish` to three handlers. |
 
-The handlers do no work, so what is measured is the library. Read the allocation column as much as the time: a behaviour
-instance, a step and a delegate are allocated for each behaviour in a request's pipeline.
+The handlers do no work, so what is measured is the library. Read the allocation column as much as the time: a request
+allocates its handler, the instance of each behaviour in its pipeline (behaviours are built for every request, so they can use
+scoped services), and one pipeline object when there is at least one behaviour.
 
 Compare against another library on your own machine by adding it to a scratch project that references `Sondor.Cqrs`. This
 repository does not reference other mediator libraries.
