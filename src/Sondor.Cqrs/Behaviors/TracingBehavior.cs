@@ -8,55 +8,59 @@ internal sealed class TracingBehavior<TRequest, TResponse>(IOutcomeReader<TRespo
     IPipelineBehavior<TRequest, TResponse>
     where TRequest : IRequest<TResponse>
 {
-    public ValueTask<TResponse> Handle(TRequest request, RequestContinuation<TResponse> continuation, CancellationToken cancellationToken)
-    {
-        var activity = Diagnostics.Source.StartActivity(typeof(TRequest).Name);
+    public ValueTask<TResponse> Handle(TRequest request, RequestContinuation<TResponse> continuation, CancellationToken cancellationToken) =>
+        Diagnostics.Source.HasListeners()
+            ? Traced(continuation, cancellationToken)
+            : continuation();
 
-        return activity is null
-            ? continuation()
-            : Traced(activity, continuation, cancellationToken);
-    }
-
-    private async ValueTask<TResponse> Traced(Activity activity, RequestContinuation<TResponse> continuation, CancellationToken cancellationToken)
+    private async ValueTask<TResponse> Traced(RequestContinuation<TResponse> continuation, CancellationToken cancellationToken)
     {
-        using (activity)
+        // Started in this async method, not in the caller of it: Activity.Current is an async local, and a change made inside an
+        // async method is undone when the method returns to its caller. Started outside, the span is left current after it ends,
+        // and every later request becomes a child of the one before.
+        using var activity = Diagnostics.Source.StartActivity(typeof(TRequest).Name);
+
+        if (activity is null)
         {
-            activity.SetTag(Diagnostics.RequestTag, typeof(TRequest).FullName);
-            activity.SetTag(Diagnostics.KindTag, RequestKind<TRequest>.Value);
+            // Something listens, but not to this span.
+            return await continuation().ConfigureAwait(false);
+        }
 
-            try
+        activity.SetTag(Diagnostics.RequestTag, typeof(TRequest).FullName);
+        activity.SetTag(Diagnostics.KindTag, RequestKind<TRequest>.Value);
+
+        try
+        {
+            var response = await continuation().ConfigureAwait(false);
+
+            var outcome = outcomeReader?.Read(response) ?? RequestOutcome.Success;
+
+            if (outcome.IsSuccess)
             {
-                var response = await continuation().ConfigureAwait(false);
-
-                var outcome = outcomeReader?.Read(response) ?? RequestOutcome.Success;
-
-                if (outcome.IsSuccess)
-                {
-                    activity.SetTag(Diagnostics.OutcomeTag, Diagnostics.Success);
-                }
-                else
-                {
-                    activity.SetTag(Diagnostics.OutcomeTag, Diagnostics.Failure);
-                    activity.SetTag(Diagnostics.ErrorCodeTag, outcome.ErrorCode);
-                    activity.SetTag(Diagnostics.ErrorTypeTag, outcome.ErrorCode ?? Diagnostics.Failure);
-                    activity.SetStatus(ActivityStatusCode.Error, outcome.ErrorCode);
-                }
-
-                return response;
+                activity.SetTag(Diagnostics.OutcomeTag, Diagnostics.Success);
             }
-            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+            else
             {
-                activity.SetTag(Diagnostics.OutcomeTag, Diagnostics.Cancelled);
-                throw;
+                activity.SetTag(Diagnostics.OutcomeTag, Diagnostics.Failure);
+                activity.SetTag(Diagnostics.ErrorCodeTag, outcome.ErrorCode);
+                activity.SetTag(Diagnostics.ErrorTypeTag, outcome.ErrorCode ?? Diagnostics.Failure);
+                activity.SetStatus(ActivityStatusCode.Error, outcome.ErrorCode);
             }
-            catch (Exception exception)
-            {
-                activity.SetTag(Diagnostics.OutcomeTag, Diagnostics.Error);
-                activity.SetTag(Diagnostics.ErrorTypeTag, exception.GetType().FullName);
-                activity.AddException(exception);
-                activity.SetStatus(ActivityStatusCode.Error, exception.GetType().Name);
-                throw;
-            }
+
+            return response;
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            activity.SetTag(Diagnostics.OutcomeTag, Diagnostics.Cancelled);
+            throw;
+        }
+        catch (Exception exception)
+        {
+            activity.SetTag(Diagnostics.OutcomeTag, Diagnostics.Error);
+            activity.SetTag(Diagnostics.ErrorTypeTag, exception.GetType().FullName);
+            activity.AddException(exception);
+            activity.SetStatus(ActivityStatusCode.Error, exception.GetType().Name);
+            throw;
         }
     }
 }
