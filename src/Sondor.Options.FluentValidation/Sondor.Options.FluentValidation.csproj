@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <MinVerTagPrefix>options-fluentvalidation-v</MinVerTagPrefix>
+    <Description>FluentValidation for Sondor.Options: validates options with the IValidator of their type when the host starts and when configuration reloads. Only the validator you ask for is registered; nothing scans assemblies.</Description>
+    <PackageTags>options;configuration;fluentvalidation;validation;appconfiguration</PackageTags>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Released versions, not project references (see Sondor.Cqrs.FluentValidation). -->
+    <PackageReference Include="Sondor.Options" />
+    <PackageReference Include="FluentValidation" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Sondor.Options.FluentValidation.Tests" />
+  </ItemGroup>
+
+</Project>

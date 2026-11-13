@@ -1,0 +1,4 @@
+#nullable enable
+Sondor.Options.FluentValidationOptionsExtensions
+static Sondor.Options.FluentValidationOptionsExtensions.ValidateFluently<TOptions>(this Microsoft.Extensions.Options.OptionsBuilder<TOptions!>! builder) -> Microsoft.Extensions.Options.OptionsBuilder<TOptions!>!
+static Sondor.Options.FluentValidationOptionsExtensions.ValidateFluently<TOptions, TValidator>(this Microsoft.Extensions.Options.OptionsBuilder<TOptions!>! builder) -> Microsoft.Extensions.Options.OptionsBuilder<TOptions!>!

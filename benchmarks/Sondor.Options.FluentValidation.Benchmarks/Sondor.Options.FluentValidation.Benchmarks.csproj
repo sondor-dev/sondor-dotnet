@@ -1,0 +1,8 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Sondor.Options.FluentValidation\Sondor.Options.FluentValidation.csproj" />
+    <PackageReference Include="BenchmarkDotNet" />
+  </ItemGroup>
+
+</Project>

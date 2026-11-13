@@ -46,3 +46,9 @@ exact ratios against the bare value, which the compiler folds away.
 
 Sondor.Options replaces the options factory, so what has to hold is that a read costs what the framework's costs and allocates
 nothing, and that a change costs the same however many came before it.
+
+## Sondor.Options.FluentValidation
+
+| Class | Measures |
+|---|---|
+| `ValidationBenchmarks` | A configuration change, and a snapshot built in a new scope, validated with FluentValidation against the same three checks written as a `Validate` delegate. Each validation resolves the validator from a scope of its own, so the question is what that costs and that it does not grow: every case runs after 0 and after 10,000 earlier changes. |
