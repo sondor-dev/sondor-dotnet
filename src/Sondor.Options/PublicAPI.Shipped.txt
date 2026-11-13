@@ -1,1 +1,12 @@
 #nullable enable
+Sondor.Options.ISondorOptionsState<TOptions>
+Sondor.Options.ISondorOptionsState<TOptions>.IsConfigured.get -> bool
+Sondor.Options.InvalidReloadBehavior
+Sondor.Options.InvalidReloadBehavior.Fail = 1 -> Sondor.Options.InvalidReloadBehavior
+Sondor.Options.InvalidReloadBehavior.KeepLastValid = 0 -> Sondor.Options.InvalidReloadBehavior
+Sondor.Options.SectionRequirement
+Sondor.Options.SectionRequirement.Optional = 1 -> Sondor.Options.SectionRequirement
+Sondor.Options.SectionRequirement.Required = 0 -> Sondor.Options.SectionRequirement
+Sondor.Options.SondorOptionsExtensions
+static Sondor.Options.SondorOptionsExtensions.AddSondorOptions<TOptions>(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, string? section = null, Sondor.Options.SectionRequirement requirement = Sondor.Options.SectionRequirement.Required, Sondor.Options.InvalidReloadBehavior onInvalidReload = Sondor.Options.InvalidReloadBehavior.KeepLastValid) -> Microsoft.Extensions.Options.OptionsBuilder<TOptions!>!
+static Sondor.Options.SondorOptionsExtensions.HasSondorSection<TOptions>(this Microsoft.Extensions.Configuration.IConfiguration! configuration, string? section = null) -> bool
