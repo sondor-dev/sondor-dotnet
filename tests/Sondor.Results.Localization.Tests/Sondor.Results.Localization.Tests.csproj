@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Sondor.Results.Localization\Sondor.Results.Localization.csproj" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" />
+    <!-- Only to prove the .resx path: the package itself depends on the abstractions alone. -->
+    <PackageReference Include="Microsoft.Extensions.Localization" />
+  </ItemGroup>
+
+</Project>

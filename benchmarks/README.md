@@ -60,3 +60,12 @@ nothing, and that a change costs the same however many came before it.
 |---|---|
 | `SpanBenchmarks` | Starting and ending one span with the OpenTelemetry SDK set up by hand, against Sondor.Observability with a sampling ratio of 1, with a ratio of 0, and with traces off. Nothing is exported, so this is the sampler and listener cost every span pays. |
 | `ReloadBenchmarks` | One sampling ratio change, and one span afterwards. Every case runs after 0 and after 10,000 earlier changes: a listener or a sampler left behind by each change would show as a difference between the two. |
+
+## Sondor.Results.Localization
+
+| Class | Measures |
+|---|---|
+| `LocalizeBenchmarks` | Turning an error into text, which happens on the failure path only: the English text (no lookup), a French error found by its general template (a sentence, a title and two words of vocabulary), one found by its own code, one with no translation at all (every layer asked, then English), and the overload that follows the current culture, against reading the description the error already carries. The store is a dictionary, so this is the localizer and not a file or a database. |
+
+A translated lookup is a few hundred nanoseconds and a handful of small allocations, on a path that already built an error, so
+read it against the cost of the failure it describes rather than against the floor.
