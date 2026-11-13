@@ -32,6 +32,7 @@ repository does not reference other mediator libraries.
 | `CreateAndReadBenchmarks` | Making a result and reading it (`Success`, the implicit conversions, `Failure`, `TryGetValue`), against a bare value, and reading through `IResultState` by a constrained generic call and by an interface variable. |
 | `ChainingBenchmarks` | `Ensure`, `Map`, `Bind` and `Tap` on a success and on a failure, with static lambdas, and with a lambda that captures a variable (which allocates in the caller). |
 | `FailureBenchmarks` | The same expected failure returned as a value and thrown and caught as an exception. |
+| `ErrorCreationBenchmarks` | Making an error on the failure path: the constructor, a built-in factory, a template with a code of its own and one declared by the application, against the constructor as the floor. These allocate (the arguments and the formatted description); the point is that it is a few small objects, and that the success path pays nothing. |
 
 A result is a struct, so the allocation column is expected to be empty, except where a lambda captures a variable. Several of
 these operations take a nanosecond or two, which BenchmarkDotNet can only estimate: read them as "a few nanoseconds", not as
