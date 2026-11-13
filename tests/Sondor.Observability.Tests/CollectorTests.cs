@@ -8,7 +8,7 @@ namespace Sondor.Observability.Tests;
 
 /// <summary>
 /// The whole path against a real OpenTelemetry Collector in a container: the service exports over gRPC and over HTTP, and the
-/// collector writes what it received to files that the test reads back. Skipped when no container runtime is reachable.
+/// collector logs what it received and the test reads that back. Skipped when no container runtime is reachable, or when it runs Windows containers.
 /// </summary>
 [NonParallelizable]
 public class CollectorTests
@@ -44,6 +44,12 @@ public class CollectorTests
     [OneTimeSetUp]
     public async Task StartCollector()
     {
+        if (DockerOperatingSystem() is not "linux")
+        {
+            // A Windows container host (the hosted Windows runners) cannot run the Linux collector image.
+            Assert.Ignore("The container runtime is not reachable, or does not run Linux containers.");
+        }
+
         try
         {
             _collector = new ContainerBuilder(Image)
@@ -58,6 +64,35 @@ public class CollectorTests
         catch (Exception exception) when (exception is DockerUnavailableException or TimeoutException or HttpRequestException)
         {
             Assert.Ignore($"No container runtime is reachable: {exception.GetType().Name}.");
+        }
+    }
+
+    /// <summary>The kind of containers the Docker server runs (<c>linux</c> or <c>windows</c>), or null when it cannot be asked.</summary>
+    private static string? DockerOperatingSystem()
+    {
+        try
+        {
+            using var docker = Process.Start(new ProcessStartInfo("docker")
+            {
+                ArgumentList = { "info", "--format", "{{.OSType}}" },
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                UseShellExecute = false,
+            });
+
+            if (docker is null)
+            {
+                return null;
+            }
+
+            var output = docker.StandardOutput.ReadToEnd().Trim();
+
+            return docker.WaitForExit(30_000) && docker.ExitCode == 0 ? output : null;
+        }
+        catch (System.ComponentModel.Win32Exception)
+        {
+            // No docker on the path.
+            return null;
         }
     }
 
