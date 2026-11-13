@@ -17,6 +17,7 @@ is released on its own.
 | [`Sondor.Results`](src/Sondor.Results) | `Result`, `Result<T>` and `Error`: failures as values, with stable `Area.Reason` codes | in development |
 | `Sondor.Options` | Options bound from configuration, validated at start-up | planned |
 | [`Sondor.Cqrs`](src/Sondor.Cqrs) | In-process commands, queries and notifications with an opt-in pipeline (tracing, metrics, logging). No third-party dependencies | in development |
+| [`Sondor.Cqrs.Results`](src/Sondor.Cqrs.Results) | `Sondor.Results` support for `Sondor.Cqrs`: failed results show up as failures in traces, metrics and logs | in development |
 | `Sondor.AspNetCore` | `Result` to RFC 9457 problem details, with `errorCode` and `traceId` | planned |
 | `Sondor.Observability` | OpenTelemetry setup for services | planned |
 | `Sondor.Http` | Typed HTTP clients with resilience, returning `Result` | planned |

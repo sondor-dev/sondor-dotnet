@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <MinVerTagPrefix>cqrs-results-v</MinVerTagPrefix>
+    <Description>Sondor.Results support for Sondor.Cqrs: tracing, metrics and logging report a failed Result with its error code, and behaviours can refuse a request by returning one.</Description>
+    <PackageTags>cqrs;result;error-handling;mediator;opentelemetry</PackageTags>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Released versions, not project references: the release build stamps one version on every project it builds, so a project
+         reference would give this package the wrong dependency version. The pinned version is also the oldest one that works. -->
+    <PackageReference Include="Sondor.Cqrs" />
+    <PackageReference Include="Sondor.Results" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Sondor.Cqrs.Results.Tests" />
+  </ItemGroup>
+
+</Project>
