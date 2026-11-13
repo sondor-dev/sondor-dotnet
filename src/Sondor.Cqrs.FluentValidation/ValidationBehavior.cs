@@ -20,7 +20,7 @@ internal sealed class ValidationBehavior<TRequest, TResponse>(IEnumerable<IValid
         var all = validators as IValidator<TRequest>[] ?? [.. validators];
 
         return all.Length == 0
-            ? continuation()
+            ? continuation.Invoke()
             : ValidateThenContinue(all, request, continuation, cancellationToken);
     }
 
@@ -43,7 +43,7 @@ internal sealed class ValidationBehavior<TRequest, TResponse>(IEnumerable<IValid
 
         if (failures is null)
         {
-            return await continuation().ConfigureAwait(false);
+            return await continuation.Invoke().ConfigureAwait(false);
         }
 
         Record(failures);

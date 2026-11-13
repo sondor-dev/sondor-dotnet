@@ -54,7 +54,7 @@ public sealed class RequireTenant<TRequest, TResponse>(IEnumerable<IFailureFacto
     public ValueTask<TResponse> Handle(TRequest request, RequestContinuation<TResponse> continuation, CancellationToken ct) =>
         factories.FirstOrDefault() is { } factory && !HasTenant(request)
             ? ValueTask.FromResult(factory.Create(new RequestFailure("Tenant.Missing", "A tenant is required.", FailureKind.Failure)))
-            : continuation();
+            : continuation.Invoke();
 }
 ```
 
