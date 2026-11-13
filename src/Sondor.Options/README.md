@@ -12,7 +12,7 @@ dotnet add package Sondor.Options
 services.AddSondorOptions<DatabaseOptions>()                       // section "DatabaseOptions", required
     .Validate(options => options.Timeout > 0, "Timeout must be positive.");
 
-services.AddSondorOptions<LokiOptions>("Logging:Loki", SectionRequirement.Optional);   // on when "Logging:Loki" is configured
+services.AddSondorOptions<ExportOptions>("Features:Export", SectionRequirement.Optional);   // on when "Features:Export" is configured
 ```
 
 `AddSondorOptions` returns the framework's `OptionsBuilder<T>`, so `Validate`, `ValidateDataAnnotations`, `PostConfigure` and the
@@ -42,10 +42,10 @@ Two ways to use it, for two questions.
 **Should this feature's services exist at all?** Ask while registering:
 
 ```csharp
-if (builder.Configuration.HasSondorSection<LokiOptions>("Logging:Loki"))
+if (builder.Configuration.HasSondorSection<ExportOptions>("Features:Export"))
 {
-    services.AddSondorOptions<LokiOptions>("Logging:Loki");
-    services.AddLokiSink();
+    services.AddSondorOptions<ExportOptions>("Features:Export");
+    services.AddExporter();
 }
 ```
 
@@ -54,7 +54,7 @@ This reads the configuration once, at startup.
 **Is it on right now?** Register it as optional and ask `ISondorOptionsState<T>`, which reads the live configuration:
 
 ```csharp
-public sealed class Sink(IOptionsMonitor<LokiOptions> options, ISondorOptionsState<LokiOptions> state)
+public sealed class Sink(IOptionsMonitor<ExportOptions> options, ISondorOptionsState<ExportOptions> state)
 {
     public void Write(string line)
     {
