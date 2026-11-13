@@ -21,7 +21,7 @@ is released on its own.
 | [`Sondor.Cqrs`](src/Sondor.Cqrs) | In-process commands, queries and notifications with an opt-in pipeline (tracing, metrics, logging). No third-party dependencies | in development |
 | [`Sondor.Cqrs.Results`](src/Sondor.Cqrs.Results) | `Sondor.Results` support for `Sondor.Cqrs`: failed results show up as failures in traces, metrics and logs | in development |
 | [`Sondor.Cqrs.FluentValidation`](src/Sondor.Cqrs.FluentValidation) | FluentValidation for `Sondor.Cqrs`: validates every request before its handler | in development |
-| `Sondor.AspNetCore` | `Result` to RFC 9457 problem details, with `errorCode` and `traceId` | planned |
+| [`Sondor.AspNetCore`](src/Sondor.AspNetCore) | One consistent RFC 9457 problem response for an ASP.NET Core API: a failed `Result`, an unhandled exception and the framework's own bare 401 or 404 share one shape with a stable `errorCode` and a trace id. Minimal APIs and MVC | in development |
 | [`Sondor.Observability`](src/Sondor.Observability) | OpenTelemetry for services from configuration: traces, metrics and logs with one resource, OTLP export, and sampling and signals you can change while the service runs | in development |
 | `Sondor.Http` | Typed HTTP clients with resilience, returning `Result` | planned |
 
