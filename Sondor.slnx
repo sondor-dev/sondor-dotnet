@@ -7,6 +7,7 @@
   </Folder>
   <Folder Name="/benchmarks/">
     <Project Path="benchmarks/Sondor.Cqrs.Benchmarks/Sondor.Cqrs.Benchmarks.csproj" />
+    <Project Path="benchmarks/Sondor.Results.Benchmarks/Sondor.Results.Benchmarks.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/Sondor.Cqrs.Tests/Sondor.Cqrs.Tests.csproj" />
