@@ -73,11 +73,11 @@ public class SectionTests
     [Test]
     public void AnOptionalSectionThatIsThereAndValidBinds()
     {
-        var source = new ReloadableConfiguration().With(("Features:Loki:Endpoint", "https://loki"));
+        var source = new ReloadableConfiguration().With(("Features:Export:Endpoint", "https://exporter.example"));
         using var provider = Hosting.Provider(source, services =>
-            services.AddSondorOptions<FeatureOptions>("Features:Loki", SectionRequirement.Optional));
+            services.AddSondorOptions<FeatureOptions>("Features:Export", SectionRequirement.Optional));
 
-        Assert.That(provider.GetRequiredService<IOptions<FeatureOptions>>().Value.Endpoint, Is.EqualTo("https://loki"));
+        Assert.That(provider.GetRequiredService<IOptions<FeatureOptions>>().Value.Endpoint, Is.EqualTo("https://exporter.example"));
     }
 
     [Test]
