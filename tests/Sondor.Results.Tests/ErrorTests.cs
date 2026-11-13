@@ -85,6 +85,104 @@ public sealed class ErrorTests
     }
 
     [Test]
+    public void An_Error_Made_With_The_Constructor_Should_Have_No_Arguments()
+    {
+        using (Assert.EnterMultipleScope())
+        {
+            Assert.That(NotFound.Arguments, Is.SameAs(ErrorArguments.Empty));
+            Assert.That(NotFound.Arguments, Is.Empty);
+            Assert.That(NotFound.Arguments.Template, Is.Null);
+            Assert.That(default(Error).Arguments, Is.Empty, "the default error must not hand out null");
+        }
+    }
+
+    [Test]
+    public void Errors_Without_Arguments_Should_Equal_Each_Other_As_In_0_1()
+    {
+        var same = NotFound with { Arguments = ErrorArguments.Empty };
+
+        using (Assert.EnterMultipleScope())
+        {
+            Assert.That(same, Is.EqualTo(NotFound));
+            Assert.That(same.GetHashCode(), Is.EqualTo(NotFound.GetHashCode()));
+        }
+    }
+
+    [Test]
+    public void An_Error_With_Arguments_Should_Not_Equal_One_Without()
+    {
+        var withArguments = Error.NotFound("Order", "Id");
+        var plain = new Error(withArguments.Code, withArguments.Description, withArguments.Type);
+
+        Assert.That(withArguments, Is.Not.EqualTo(plain));
+    }
+
+    [Test]
+    public void Deconstruct_Should_Still_Give_Only_The_Three_Original_Parts()
+    {
+        var (code, description, type) = Error.NotFound("Order", "Id");
+
+        using (Assert.EnterMultipleScope())
+        {
+            Assert.That(code, Is.EqualTo("Resource.NotFound"));
+            Assert.That(description, Is.EqualTo("No Order was found for the given Id."));
+            Assert.That(type, Is.EqualTo(ErrorType.NotFound));
+        }
+    }
+
+    [Test]
+    public void Error_Should_Stay_Three_Words_Wide()
+    {
+        // Every Result and Result<T> contains an Error, success included, so a fourth field would make all of them bigger.
+        // This is the guard for that: the arguments share the description's reference rather than adding one.
+        Assert.That(System.Runtime.CompilerServices.Unsafe.SizeOf<Error>(), Is.EqualTo(3 * IntPtr.Size));
+    }
+
+    [Test]
+    public void With_A_New_Description_Should_Keep_The_Arguments()
+    {
+        var changed = Error.NotFound("Order", "Id") with { Description = "Changed." };
+
+        using (Assert.EnterMultipleScope())
+        {
+            Assert.That(changed.Description, Is.EqualTo("Changed."));
+            Assert.That(changed.Arguments, Has.Count.EqualTo(2));
+            Assert.That(changed.Arguments.Template, Is.EqualTo("Resource.NotFound"));
+        }
+    }
+
+    [Test]
+    public void With_Arguments_Should_Keep_The_Description()
+    {
+        var other = Error.NotFound("Customer", "Email");
+        var changed = NotFound with { Arguments = other.Arguments };
+
+        using (Assert.EnterMultipleScope())
+        {
+            Assert.That(changed.Description, Is.EqualTo(NotFound.Description));
+            Assert.That(changed.Arguments, Has.Count.EqualTo(2));
+        }
+    }
+
+    [Test]
+    public void With_Empty_Arguments_Should_Drop_Them_And_Keep_The_Description()
+    {
+        var plain = Error.NotFound("Order", "Id") with { Arguments = ErrorArguments.Empty };
+
+        using (Assert.EnterMultipleScope())
+        {
+            Assert.That(plain.Arguments, Is.Empty);
+            Assert.That(plain.Description, Is.EqualTo("No Order was found for the given Id."));
+        }
+    }
+
+    [Test]
+    public void ToString_Of_An_Error_Without_Arguments_Should_Not_Mention_Them()
+    {
+        Assert.That(NotFound.ToString(), Does.Not.Contain("Arguments"));
+    }
+
+    [Test]
     public void ErrorType_Values_Should_Keep_Their_Numbers()
     {
         // Consumers may store or transmit the number; a reordering would silently change what it means.
