@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <MinVerTagPrefix>aspnetcore-v</MinVerTagPrefix>
+    <Description>One consistent RFC 9457 problem response for an ASP.NET Core API: a failed Sondor.Results Result, an exception and the framework's own 401 or 404 all leave the service with the same shape, a stable error code and a trace id. Built on the framework's own ProblemDetails, exception handler and status code pages, for minimal APIs and MVC.</Description>
+    <PackageTags>aspnetcore;problem-details;rfc9457;result;error-handling;exception-handler;minimal-api;mvc</PackageTags>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- The shared framework: nothing to download, and no package of its own to keep patched. -->
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- A released version, not a project reference (see Sondor.Cqrs.Results). The pinned version is also the oldest one that works. -->
+    <PackageReference Include="Sondor.Results" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="Sondor.Results" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Sondor.AspNetCore.Tests" />
+  </ItemGroup>
+
+</Project>
