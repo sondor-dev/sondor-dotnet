@@ -61,15 +61,8 @@ internal sealed class RequestWrapper<TRequest, TResponse> : RequestWrapper<TResp
             return Invoke(handler, typed, cancellationToken);
         }
 
-        // Built inside out: the last behaviour wraps the handler, the first one wraps everything.
-        RequestContinuation<TResponse> continuation = () => Invoke(handler, typed, cancellationToken);
-
-        for (var index = behaviors.Length - 1; index >= 0; index--)
-        {
-            continuation = new Step(behaviors[index], typed, continuation, cancellationToken).Invoke;
-        }
-
-        return continuation();
+        // One object for the whole pipeline: a behaviour's continuation is only a position in it.
+        return new Pipeline(handler, behaviors, typed, cancellationToken).Run(0);
     }
 
     private static ValueTask<TResponse> Invoke(IRequestHandler<TRequest, TResponse> handler, TRequest request, CancellationToken cancellationToken)
@@ -96,13 +89,25 @@ internal sealed class RequestWrapper<TRequest, TResponse> : RequestWrapper<TResp
         };
     }
 
-    private sealed class Step(IPipelineBehavior<TRequest, TResponse> behavior,
+    private sealed class Pipeline(IRequestHandler<TRequest, TResponse> handler,
+        IPipelineBehavior<TRequest, TResponse>[] behaviors,
         TRequest request,
-        RequestContinuation<TResponse> continuation,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken) :
+        RequestPipeline<TResponse>
     {
-        public ValueTask<TResponse> Invoke() => behavior.Handle(request, continuation, cancellationToken);
+        // Position 0 is the first behaviour, the outermost; past the last behaviour is the handler. Running a position again, as a
+        // retrying behaviour does, runs everything inside it again: nothing is kept in the pipeline between runs.
+        public override ValueTask<TResponse> Run(int position) =>
+            position < behaviors.Length
+                ? behaviors[position].Handle(request, new RequestContinuation<TResponse>(this, position + 1), cancellationToken)
+                : Invoke(handler, request, cancellationToken);
     }
+}
+
+/// <summary>What a <see cref="RequestContinuation{TResponse}"/> runs: the rest of one request's pipeline, from a position.</summary>
+internal abstract class RequestPipeline<TResponse>
+{
+    public abstract ValueTask<TResponse> Run(int position);
 }
 
 internal static class NotificationWrappers

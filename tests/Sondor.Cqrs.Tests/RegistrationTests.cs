@@ -193,7 +193,7 @@ public sealed class RegistrationTests
         public async ValueTask<TResponse> Handle(TRequest request, RequestContinuation<TResponse> continuation, CancellationToken cancellationToken)
         {
             recorder.Calls.Add("First>");
-            var response = await continuation();
+            var response = await continuation.Invoke();
             recorder.Calls.Add("<");
             return response;
         }
@@ -205,7 +205,7 @@ public sealed class RegistrationTests
         public async ValueTask<TResponse> Handle(TRequest request, RequestContinuation<TResponse> continuation, CancellationToken cancellationToken)
         {
             recorder.Calls.Add("Secon>");
-            var response = await continuation();
+            var response = await continuation.Invoke();
             recorder.Calls.Add("<");
             return response;
         }
@@ -216,7 +216,7 @@ public sealed class RegistrationTests
         public async ValueTask<string> Handle(Ping request, RequestContinuation<string> continuation, CancellationToken cancellationToken)
         {
             recorder.Calls.Add("ping");
-            var response = await continuation();
+            var response = await continuation.Invoke();
             recorder.Calls.Add("<");
             return response;
         }
@@ -231,6 +231,6 @@ public sealed class RegistrationTests
     internal sealed class TwiceBehavior : IPipelineBehavior<Plain, int>
     {
         public async ValueTask<int> Handle(Plain request, RequestContinuation<int> continuation, CancellationToken cancellationToken) =>
-            await continuation() + await continuation() + 0;
+            await continuation.Invoke() + await continuation.Invoke() + 0;
     }
 }

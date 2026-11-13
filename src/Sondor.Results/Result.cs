@@ -1,3 +1,5 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace Sondor.Results;
 
 /// <summary>
@@ -94,7 +96,7 @@ public readonly struct Result : IResultState, IEquatable<Result>
     {
         ArgumentNullException.ThrowIfNull(next);
 
-        return IsSuccess ? next() : Result<T>.CreateFailure(Error);
+        return IsSuccess ? next() : Result<T>.Propagate(Error);
     }
 
     /// <summary>Produces a value when the operation succeeded; a failure is passed on without running <paramref name="map"/>.</summary>
@@ -104,7 +106,7 @@ public readonly struct Result : IResultState, IEquatable<Result>
 
         if (IsFailure)
         {
-            return Result<T>.CreateFailure(Error);
+            return Result<T>.Propagate(Error);
         }
 
         // Through the implicit conversion, so a null result is the NullValue failure rather than an exception.
@@ -131,11 +133,23 @@ public readonly struct Result : IResultState, IEquatable<Result>
     /// <summary>"Success", or "Failure" with the error code. The description is left out: it can be long.</summary>
     public override string ToString() => IsSuccess ? "Success" : $"Failure({Error.Code})";
 
+    /// <summary>
+    /// A failure from an error that is already known to have a code: the <c>Error</c> of another failed result, which is never
+    /// <see cref="Results.Error.None"/>. Passing a failure on through <c>Map</c>, <c>Bind</c> or a conversion does not check it again.
+    /// </summary>
+    internal static Result Propagate(Error error) => new(false, error);
+
     internal static void EnsureIsAnError(Error error)
     {
         if (error.IsNone)
         {
-            throw new ArgumentException("A failure needs an error with a code; Error.None is the error of a success.", nameof(error));
+            ThrowErrorHasNoCode();
         }
     }
+
+    // The throw is in its own method so the check above stays small enough for the compiler to inline into every caller: a method
+    // that contains a throw with a message is much less likely to be inlined, and this runs for every failure that is made.
+    [DoesNotReturn]
+    private static void ThrowErrorHasNoCode() =>
+        throw new ArgumentException("A failure needs an error with a code; Error.None is the error of a success.", "error");
 }

@@ -130,6 +130,7 @@ public sealed class CqrsBuilder
         ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(threshold, TimeSpan.Zero, nameof(slowRequestThreshold));
 
         _services.Replace(ServiceDescriptor.Singleton(new LoggingSettings(threshold)));
+        _services.TryAddSingleton<CqrsLogger>();
         _behaviors.Add(typeof(LoggingBehavior<,>));
 
         return this;

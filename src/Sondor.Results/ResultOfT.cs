@@ -33,11 +33,32 @@ public readonly struct Result<T> : IResultState, IEquatable<Result<T>>
 
     /// <summary>The value of a success.</summary>
     /// <exception cref="InvalidOperationException">The result is a failure. Check <see cref="IsSuccess"/> first, or use <see cref="TryGetValue"/> or <see cref="Match{TResult}"/>.</exception>
-    public T Value => _isSuccess
-        ? _value!
-        : throw new InvalidOperationException($"The value of a failure result can not be accessed. The failure is {Error.Code}.");
+    public T Value
+    {
+        get
+        {
+            if (!_isSuccess)
+            {
+                ThrowValueOfAFailure();
+            }
+
+            return _value!;
+        }
+    }
+
+    // The throw is in its own method so the getter stays small enough for the compiler to inline: a getter with a throw and a
+    // formatted message is much less likely to be, and Map, Bind, Tap, Match and every caller read the value through it.
+    [DoesNotReturn]
+    private void ThrowValueOfAFailure() =>
+        throw new InvalidOperationException($"The value of a failure result can not be accessed. The failure is {Error.Code}.");
 
     internal static Result<T> CreateSuccess(T value) => new(true, value, Error.None);
+
+    /// <summary>
+    /// A failure from an error that is already known to have a code: the <c>Error</c> of another failed result, which is never
+    /// <see cref="Results.Error.None"/>. Passing a failure on through <c>Map</c> or <c>Bind</c> does not check it again.
+    /// </summary>
+    internal static Result<T> Propagate(Error error) => new(false, default, error);
 
     /// <summary>A failed result.</summary>
     /// <exception cref="ArgumentException"><paramref name="error"/> has no code (it is <see cref="Results.Error.None"/>): a failure has to say why.</exception>
@@ -60,7 +81,7 @@ public readonly struct Result<T> : IResultState, IEquatable<Result<T>>
 
     /// <summary>Forgets the value: a success stays a success, a failure keeps its error.</summary>
     public static implicit operator Result(Result<T> result) =>
-        result.IsSuccess ? Result.Success() : Result.Failure(result.Error);
+        result.IsSuccess ? Result.Success() : Result.Propagate(result.Error);
 
     /// <summary>Gets the value when the operation succeeded.</summary>
     /// <param name="value">The value of a success; the default when the result is a failure.</param>
@@ -78,7 +99,7 @@ public readonly struct Result<T> : IResultState, IEquatable<Result<T>>
         ArgumentNullException.ThrowIfNull(onSuccess);
         ArgumentNullException.ThrowIfNull(onFailure);
 
-        return IsSuccess ? onSuccess(Value) : onFailure(Error);
+        return IsSuccess ? onSuccess(_value!) : onFailure(Error);
     }
 
     /// <summary>Runs <paramref name="action"/> with the value when the operation succeeded, and returns this result unchanged.</summary>
@@ -88,7 +109,7 @@ public readonly struct Result<T> : IResultState, IEquatable<Result<T>>
 
         if (IsSuccess)
         {
-            action(Value);
+            action(_value!);
         }
 
         return this;
@@ -101,11 +122,11 @@ public readonly struct Result<T> : IResultState, IEquatable<Result<T>>
 
         if (IsFailure)
         {
-            return Result<TNext>.CreateFailure(Error);
+            return Result<TNext>.Propagate(Error);
         }
 
         // Through the implicit conversion, so a null result is the NullValue failure rather than an exception.
-        Result<TNext> mapped = map(Value);
+        Result<TNext> mapped = map(_value!);
 
         return mapped;
     }
@@ -115,7 +136,7 @@ public readonly struct Result<T> : IResultState, IEquatable<Result<T>>
     {
         ArgumentNullException.ThrowIfNull(next);
 
-        return IsSuccess ? next(Value) : Result<TNext>.CreateFailure(Error);
+        return IsSuccess ? next(_value!) : Result<TNext>.Propagate(Error);
     }
 
     /// <summary>
@@ -127,7 +148,7 @@ public readonly struct Result<T> : IResultState, IEquatable<Result<T>>
     {
         ArgumentNullException.ThrowIfNull(predicate);
 
-        return IsSuccess && !predicate(Value) ? CreateFailure(error) : this;
+        return IsSuccess && !predicate(_value!) ? CreateFailure(error) : this;
     }
 
     /// <inheritdoc />

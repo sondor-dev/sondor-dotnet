@@ -162,6 +162,40 @@ public sealed class TracingTests
     }
 
     [Test]
+    public async Task Requests_Sent_One_After_Another_Should_Not_Become_Each_Others_Parents()
+    {
+        await using var provider = Provider.Build(cqrs => cqrs.UseTracing());
+        var sender = provider.GetRequiredService<ISender>();
+
+        await sender.Send(new Ping("a"));
+        await sender.Send(new Plain(1));
+        await sender.Send(new Rename("n"));
+
+        using (Assert.EnterMultipleScope())
+        {
+            Assert.That(_activities, Has.Count.EqualTo(3));
+            Assert.That(_activities.Select(activity => activity.ParentId), Has.All.Null);
+            Assert.That(Activity.Current, Is.Null);
+        }
+    }
+
+    [Test]
+    public async Task A_Request_Sent_Inside_A_Span_Should_Be_Its_Child_And_Leave_The_Span_Current()
+    {
+        await using var provider = Provider.Build(cqrs => cqrs.UseTracing());
+        using var outer = new ActivitySource("outer").StartActivity("outer") ?? new Activity("outer").Start();
+
+        await provider.GetRequiredService<ISender>().Send(new Ping("a"));
+        await provider.GetRequiredService<ISender>().Send(new Ping("b"));
+
+        using (Assert.EnterMultipleScope())
+        {
+            Assert.That(_activities.Select(activity => activity.ParentId), Has.All.EqualTo(outer.Id));
+            Assert.That(Activity.Current, Is.SameAs(outer));
+        }
+    }
+
+    [Test]
     public async Task Nothing_Should_Be_Recorded_When_Tracing_Is_Not_Asked_For()
     {
         await using var provider = Provider.Build();
