@@ -1,3 +1,5 @@
 #nullable enable
 Sondor.Cqrs.ResultsServiceCollectionExtensions
 static Sondor.Cqrs.ResultsServiceCollectionExtensions.AddCqrsResults(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!
+const Sondor.Cqrs.CqrsResultArguments.Errors = "Errors" -> string!
+Sondor.Cqrs.CqrsResultArguments

@@ -6,6 +6,12 @@ namespace Sondor.Cqrs;
 internal sealed class ResultFailureFactory<TResponse> : IFailureFactory<TResponse>
     where TResponse : IResultState
 {
+    private const string DescriptionArgument = "Description";
+
+    private static readonly ErrorTemplate Invalid = new("Request.Invalid", ErrorType.Validation, "{" + DescriptionArgument + "}");
+
+    private static readonly ErrorTemplate Refused = new("Request.Refused", ErrorType.Failure, "{" + DescriptionArgument + "}");
+
     public TResponse Create(RequestFailure failure)
     {
         var create = Builder.Create
@@ -14,7 +20,23 @@ internal sealed class ResultFailureFactory<TResponse> : IFailureFactory<TRespons
 
         var type = failure.Kind == FailureKind.Validation ? ErrorType.Validation : ErrorType.Failure;
 
-        return create(new Error(failure.Code, failure.Description, type));
+        return create(ErrorOf(failure, type));
+    }
+
+    // A refusal without a breakdown is a plain error, as it always was. One with a breakdown keeps it as a Data argument, which a
+    // layer that reports the error can read; the description is still the joined text, which the template shows as it is.
+    private static Error ErrorOf(RequestFailure failure, ErrorType type)
+    {
+        if (failure.Errors is not { Count: > 0 } errors || string.IsNullOrWhiteSpace(failure.Description))
+        {
+            return new Error(failure.Code, failure.Description, type);
+        }
+
+        var template = type == ErrorType.Validation ? Invalid : Refused;
+
+        return template.WithCode(failure.Code).Create(
+            ErrorArgument.Term(DescriptionArgument, failure.Description),
+            ErrorArgument.Data(CqrsResultArguments.Errors, errors));
     }
 
     // Worked out once for each response type. Refusing a request is the rare path, so reflection here costs nothing that matters.

@@ -70,3 +70,17 @@ cannot have one. A collection comes back empty, and the behaviour can fall back 
 - A `Validation` refusal becomes an `Error` of type `Validation`; every other refusal becomes type `Failure`.
 - Other result types that implement `IResultState` are read, but cannot be built by the factory. Register an
   `IFailureFactory<T>` of your own for those.
+
+## The messages of each property
+
+When a validation refusal carries the messages of each property (`Sondor.Cqrs.FluentValidation` 0.2.1 and later), the failed
+result's error keeps them as a `Data` argument named `CqrsResultArguments.Errors`: an `IReadOnlyDictionary<string, string[]>` of
+property name to messages. The description is still the joined text, and the argument is never part of it. A layer that reports
+the error, such as `Sondor.AspNetCore.FluentValidation`, reads it:
+
+```csharp
+if (error.Arguments.TryGetValue(CqrsResultArguments.Errors, out var argument)
+    && argument.Value is IReadOnlyDictionary<string, string[]> errors) { ... }
+```
+
+A refusal without a breakdown gives the same plain error as before.
