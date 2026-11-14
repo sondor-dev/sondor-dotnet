@@ -86,6 +86,28 @@ public sealed class ValidationTests
     }
 
     [Test]
+    public async Task The_Failure_Should_Carry_The_Messages_Of_Each_Property_Without_Repeats()
+    {
+        await using var provider = Build(services =>
+        {
+            services.AddTransient<IValidator<Register>, NameRequired>();
+            services.AddTransient<IValidator<Register>, NameRequiredAgain>();
+            services.AddTransient<IValidator<Register>, NameShort>();
+            services.AddTransient<IValidator<Register>, NameLetters>();
+            services.AddSingleton<IFailureFactory<string>, ErrorsFailureFactory>();
+        });
+
+        var empty = await provider.GetRequiredService<ISender>().Send(new Register(""));
+        var wrong = await provider.GetRequiredService<ISender>().Send(new Register("toolong!"));
+
+        using (Assert.EnterMultipleScope())
+        {
+            Assert.That(empty, Is.EqualTo("Name=Name is required."));
+            Assert.That(wrong, Is.EqualTo("Name=Name is too long.|Name must be letters."));
+        }
+    }
+
+    [Test]
     public async Task The_Messages_Of_Different_Validators_Should_All_Be_Reported_In_Order()
     {
         await using var provider = Build(services =>
@@ -299,6 +321,12 @@ public sealed class ValidationTests
     internal sealed class TextFailureFactory : IFailureFactory<string>
     {
         public string Create(RequestFailure failure) => $"refused:{failure.Code}:{failure.Kind}:{failure.Description}";
+    }
+
+    internal sealed class ErrorsFailureFactory : IFailureFactory<string>
+    {
+        public string Create(RequestFailure failure) =>
+            string.Join(';', failure.Errors!.Select(property => $"{property.Key}={string.Join('|', property.Value)}"));
     }
 
     internal sealed class OuterBehavior<TRequest, TResponse>(Recorder recorder) : IPipelineBehavior<TRequest, TResponse>
