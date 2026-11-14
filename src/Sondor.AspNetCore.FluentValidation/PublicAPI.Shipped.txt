@@ -1,0 +1,4 @@
+#nullable enable
+const Sondor.AspNetCore.FluentValidationProblemsExtensions.ErrorCode = "Validation.Failed" -> string!
+Sondor.AspNetCore.FluentValidationProblemsExtensions
+static Sondor.AspNetCore.FluentValidationProblemsExtensions.AddSondorFluentValidationProblems(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services) -> Microsoft.Extensions.DependencyInjection.IServiceCollection!

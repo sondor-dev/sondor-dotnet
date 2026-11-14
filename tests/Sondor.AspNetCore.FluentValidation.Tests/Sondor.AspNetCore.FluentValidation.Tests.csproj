@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Sondor.AspNetCore.FluentValidation\Sondor.AspNetCore.FluentValidation.csproj" />
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    <!-- Test only: an in-memory server, so each test runs a real pipeline without opening a port. -->
+    <PackageReference Include="Microsoft.AspNetCore.TestHost" />
+    <!-- Test only: the whole path from a refused request to the response, with the released packages. -->
+    <PackageReference Include="Sondor.Cqrs.FluentValidation" />
+    <PackageReference Include="Sondor.Cqrs.Results" />
+  </ItemGroup>
+
+</Project>
