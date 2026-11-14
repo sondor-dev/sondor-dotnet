@@ -10,6 +10,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Sondor.AspNetCore.Internal;
+using Sondor.Cqrs;
 using Sondor.Results;
 
 namespace Sondor.AspNetCore.FluentValidation.Tests;
@@ -150,6 +151,82 @@ public sealed class ValidationProblemTests
     public void Name_Should_KeepThePath_When_ThereIsNoPolicy() =>
         Assert.That(ValidationProblemContributor.Name("Items[0].UnitPrice", null), Is.EqualTo("Items[0].UnitPrice"));
 
+    [Test]
+    public async Task AddSondorFluentValidationProblems_Should_AnswerErrorsByProperty_When_ARefusedRequestReturnsAResult()
+    {
+        await using var app = await StartAsync(
+            register: services =>
+            {
+                services.AddTransient<IValidator<Register>, RegisterValidator>();
+                services.AddCqrsResults();
+                services.AddCqrs(cqrs =>
+                {
+                    cqrs.AddHandlersFromAssemblyContaining<RegisterHandler>();
+                    cqrs.UseFluentValidation();
+                });
+            },
+            map: web => web.MapPost("/register", async (ISender sender) =>
+                (await sender.Send(new Register(string.Empty, "x"))).ToHttpResult()));
+
+        var response = await app.PostAsync("/register");
+        var problem = await ReadAsync(response);
+
+        Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
+        Assert.That(problem.GetProperty("errorCode").GetString(), Is.EqualTo("Validation.Failed"));
+        Assert.That(problem.GetProperty("detail").GetString(), Does.Contain("A name is required."));
+
+        var errors = problem.GetProperty("errors");
+        Assert.That(string.Join("|", Messages(errors, "name")), Is.EqualTo("A name is required."));
+        Assert.That(string.Join("|", Messages(errors, "nickName")), Is.EqualTo("A nick name is too short."));
+    }
+
+    [Test]
+    public async Task AddSondorFluentValidationProblems_Should_MergeMessages_When_TwoPropertiesShareAName()
+    {
+        var byProperty = new Dictionary<string, string[]> { ["Name"] = ["One."], ["name"] = ["One.", "Two."] };
+
+        await using var app = await StartAsync(map: web => web.MapGet("/", () => WithErrors(byProperty)));
+
+        var errors = (await ReadAsync(await app.GetAsync("/"))).GetProperty("errors");
+
+        Assert.That(string.Join("|", Messages(errors, "name")), Is.EqualTo("One.|Two."));
+    }
+
+    [Test]
+    public async Task AddSondorFluentValidationProblems_Should_NotAddErrors_When_TheArgumentIsNotTheMessagesOfProperties()
+    {
+        await using var app = await StartAsync(map: web => web.MapGet("/", () => WithErrors("not a dictionary")));
+
+        var problem = await ReadAsync(await app.GetAsync("/"));
+
+        Assert.That(problem.TryGetProperty("errors", out _), Is.False);
+    }
+
+    private static IResult WithErrors(object value) =>
+        Result.Failure(ErrorTemplates.Invalid
+                .WithCode("Order.Invalid")
+                .Create(
+                    ErrorArgument.Term(ErrorArgumentNames.Entity, "Order"),
+                    ErrorArgument.Term(ErrorArgumentNames.Property, "Total"),
+                    ErrorArgument.Data("Errors", value)))
+            .ToHttpResult();
+
+    internal sealed record Register(string Name, string NickName) : ICommand<Result>;
+
+    internal sealed class RegisterHandler : IRequestHandler<Register, Result>
+    {
+        public ValueTask<Result> Handle(Register request, CancellationToken cancellationToken) => ValueTask.FromResult(Result.Success());
+    }
+
+    internal sealed class RegisterValidator : AbstractValidator<Register>
+    {
+        public RegisterValidator()
+        {
+            RuleFor(register => register.Name).NotEmpty().WithMessage("A name is required.");
+            RuleFor(register => register.NickName).MinimumLength(3).WithMessage("A nick name is too short.");
+        }
+    }
+
     private static IResult Throw(Exception exception) => throw exception;
 
     private static string[] Messages(JsonElement errors, string property) =>
@@ -182,6 +259,8 @@ public sealed class ValidationProblemTests
         private readonly HttpClient _client = app.GetTestClient();
 
         public Task<HttpResponseMessage> GetAsync(string path) => _client.GetAsync(path);
+
+        public Task<HttpResponseMessage> PostAsync(string path) => _client.PostAsync(path, null);
 
         public async ValueTask DisposeAsync()
         {

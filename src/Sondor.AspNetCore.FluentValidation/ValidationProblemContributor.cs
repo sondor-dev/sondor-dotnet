@@ -6,22 +6,41 @@ using Microsoft.Extensions.Options;
 
 namespace Sondor.AspNetCore.Internal;
 
-/// <summary>Adds the per-property <c>errors</c> member to the problem of a <see cref="ValidationException"/>.</summary>
+/// <summary>
+/// Adds the per-property <c>errors</c> member to the problem of a <see cref="ValidationException"/>, or of a failed <c>Result</c> whose
+/// error carries the messages of each property.
+/// </summary>
 internal sealed class ValidationProblemContributor(IOptions<JsonOptions> json) : IProblemContributor
 {
+    // The name of the Data argument that Sondor.Cqrs.Results puts on the error of a refused request (CqrsResultArguments.Errors). The
+    // spelling is the contract, so this package needs no reference to that one.
+    private const string ErrorsArgument = "Errors";
+
     public void Contribute(ProblemContext context)
     {
-        if (context.Exception is not ValidationException { Errors: var failures })
-        {
-            return;
-        }
-
         var policy = json.Value.SerializerOptions.PropertyNamingPolicy;
         var errors = new Dictionary<string, string[]>(StringComparer.Ordinal);
 
-        foreach (var group in failures.GroupBy(failure => Name(failure.PropertyName, policy), StringComparer.Ordinal))
+        if (context.Exception is ValidationException { Errors: var failures })
         {
-            errors[group.Key] = [.. group.Select(failure => failure.ErrorMessage).Distinct(StringComparer.Ordinal)];
+            foreach (var group in failures.GroupBy(failure => Name(failure.PropertyName, policy), StringComparer.Ordinal))
+            {
+                errors[group.Key] = [.. group.Select(failure => failure.ErrorMessage).Distinct(StringComparer.Ordinal)];
+            }
+        }
+        else if (context.Error.Arguments.TryGetValue(ErrorsArgument, out var argument) &&
+                 argument is { Kind: ErrorArgumentKind.Data, Value: IReadOnlyDictionary<string, string[]> byProperty })
+        {
+            foreach (var (property, messages) in byProperty)
+            {
+                var name = Name(property, policy);
+
+                errors[name] = errors.TryGetValue(name, out var existing) ? [.. existing.Union(messages, StringComparer.Ordinal)] : messages;
+            }
+        }
+        else
+        {
+            return;
         }
 
         context.Problem.Extensions["errors"] = errors;

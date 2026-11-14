@@ -32,10 +32,14 @@ app.UseSondorProblemDetails();
 }
 ```
 
-## Where the exception comes from
+## Where the failure comes from
 
-Anything that throws FluentValidation's `ValidationException`: your own `ValidateAndThrowAsync`, or
-[`Sondor.Cqrs.FluentValidation`](../Sondor.Cqrs.FluentValidation) for a request whose response type has no failure factory.
+- **A `ValidationException`**: your own `ValidateAndThrowAsync`, or
+  [`Sondor.Cqrs.FluentValidation`](../Sondor.Cqrs.FluentValidation) for a request whose response type has no failure factory.
+- **A failed `Result`** from a request that [`Sondor.Cqrs.FluentValidation`](../Sondor.Cqrs.FluentValidation) 0.2.1 or later
+  refused and [`Sondor.Cqrs.Results`](../Sondor.Cqrs.Results) 0.2.1 or later answered. Its error keeps the messages of each
+  property as a `Data` argument named `Errors`, and the response gets the same `errors` member. A `Result` whose error has no
+  such argument (`Error.Invalid(...)`, or an error you built) gets none.
 
 ## Things that behave in a specific way
 
@@ -49,8 +53,6 @@ Anything that throws FluentValidation's `ValidationException`: your own `Validat
   (400 by default); set it to 422 if you prefer.
 - **The messages are your validators' messages**, sent to the caller as they are. FluentValidation's default message for some
   rules includes the rejected value, so write your own with `WithMessage` where that matters.
-- **A failed `Result` has no `errors`.** An `Error` carries a code, a description and a type, not a list of properties, so
-  there is nothing to list. To get `errors`, let the `ValidationException` escape.
 - **Your own mapping wins.** The package maps `ValidationException` through `ErrorResponseOptions.Exceptions`; a mapping you
   add afterwards replaces it, and the `errors` member is still added.
 - **Calling it twice is harmless.** Nothing is registered a second time.
