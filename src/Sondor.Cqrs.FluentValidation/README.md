@@ -54,6 +54,7 @@ public sealed class ReplyFailureFactory : IFailureFactory<Reply>
 - **The messages are your validators' messages.** FluentValidation's default messages for some rules include the rejected
   value (for example "You entered 15"). If a message can reach a client, write your own with `WithMessage`, or leave the value
   out of it. The package adds nothing from the request.
+- **The failure carries the messages of each property.** A failure factory also receives `RequestFailure.Errors` (property name, as the validator reported it, to its messages, each once), so a response can keep the breakdown that the joined description loses. It needs `Sondor.Cqrs` 0.2.1 or later.
 - **A span is tagged, never the values.** When the request is traced, `cqrs.validation.properties` lists the names of the
   properties that were refused and `cqrs.validation.error_count` how many failures there were.
 - **A request with no validator costs nothing.** It goes straight on.

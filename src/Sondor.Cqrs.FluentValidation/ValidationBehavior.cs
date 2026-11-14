@@ -58,7 +58,20 @@ internal sealed class ValidationBehavior<TRequest, TResponse>(IEnumerable<IValid
         // The validators' own messages, once each. The rejected values are never added here.
         var description = string.Join(' ', failures.Select(failure => failure.ErrorMessage).Distinct(StringComparer.Ordinal));
 
-        return factory.Create(new RequestFailure(CqrsValidation.ErrorCode, description, FailureKind.Validation));
+        return factory.Create(new RequestFailure(CqrsValidation.ErrorCode, description, FailureKind.Validation) { Errors = ByProperty(failures) });
+    }
+
+    // Property name (as the validator reported it) to its messages, each once and in the order reported.
+    private static Dictionary<string, string[]> ByProperty(List<ValidationFailure> failures)
+    {
+        var errors = new Dictionary<string, string[]>(StringComparer.Ordinal);
+
+        foreach (var group in failures.GroupBy(failure => failure.PropertyName, StringComparer.Ordinal))
+        {
+            errors[group.Key] = [.. group.Select(failure => failure.ErrorMessage).Distinct(StringComparer.Ordinal)];
+        }
+
+        return errors;
     }
 
     // On the current span (the request's, when tracing is on): which properties were refused, never their values.
