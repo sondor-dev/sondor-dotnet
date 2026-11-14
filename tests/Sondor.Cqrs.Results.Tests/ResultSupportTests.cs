@@ -120,6 +120,57 @@ public sealed class ResultSupportTests
     }
 
     [Test]
+    public void The_Factory_Should_Keep_The_Messages_Of_Each_Property_On_The_Error()
+    {
+        using var provider = Build();
+        var errors = new Dictionary<string, string[]> { ["Name"] = ["Name is required.", "Name is too short."], ["Age"] = ["Age is required."] };
+        var refusal = new RequestFailure("Validation.Failed", "Name is required. Age is required.", FailureKind.Validation) { Errors = errors };
+
+        var result = provider.GetRequiredService<IFailureFactory<Result<int>>>().Create(refusal);
+
+        using (Assert.EnterMultipleScope())
+        {
+            Assert.That(result.Error.Code, Is.EqualTo("Validation.Failed"));
+            Assert.That(result.Error.Type, Is.EqualTo(ErrorType.Validation));
+            Assert.That(result.Error.Description, Is.EqualTo("Name is required. Age is required."));
+            Assert.That(result.Error.Arguments.TryGetValue(CqrsResultArguments.Errors, out var argument), Is.True);
+            Assert.That(argument.Kind, Is.EqualTo(ErrorArgumentKind.Data));
+            Assert.That(argument.Value, Is.SameAs(errors));
+        }
+    }
+
+    [Test]
+    public void The_Factory_Should_Keep_The_Messages_When_The_Refusal_Is_Not_A_Validation()
+    {
+        using var provider = Build();
+        var errors = new Dictionary<string, string[]> { ["Name"] = ["Name is taken."] };
+        var refusal = new RequestFailure("Request.Refused", "Name is {taken}.", FailureKind.Failure) { Errors = errors };
+
+        var result = provider.GetRequiredService<IFailureFactory<Result>>().Create(refusal);
+
+        using (Assert.EnterMultipleScope())
+        {
+            Assert.That(result.Error.Type, Is.EqualTo(ErrorType.Failure));
+            Assert.That(result.Error.Description, Is.EqualTo("Name is {taken}."));
+            Assert.That(result.Error.Arguments.TryGetValue(CqrsResultArguments.Errors, out _), Is.True);
+        }
+    }
+
+    [TestCase(0)]
+    [TestCase(1)]
+    public void The_Factory_Should_Build_A_Plain_Error_When_There_Is_Nothing_To_Keep(int case_)
+    {
+        using var provider = Build();
+        var refusal = case_ == 0
+            ? new RequestFailure("Validation.Failed", "No.", FailureKind.Validation) { Errors = new Dictionary<string, string[]>() }
+            : new RequestFailure("Validation.Failed", " ", FailureKind.Validation) { Errors = new Dictionary<string, string[]> { ["A"] = ["b"] } };
+
+        var result = provider.GetRequiredService<IFailureFactory<Result>>().Create(refusal);
+
+        Assert.That(result.Error.Arguments, Is.SameAs(ErrorArguments.Empty));
+    }
+
+    [Test]
     public void The_Factory_Should_Build_A_General_Failure_For_Any_Other_Refusal()
     {
         using var provider = Build();
