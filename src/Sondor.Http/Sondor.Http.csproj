@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <MinVerTagPrefix>http-v</MinVerTagPrefix>
+    <Description>Read the answer of another HTTP service as a value: a non-success status, a problem document, a timeout and an unreachable host become a failed Sondor.Results Result, never an exception. Reads the RFC 9457 problems of Sondor.AspNetCore back into an Error with its stable code, with bounded reads, a safe error model, per-call timeouts, an opt-in bearer token that only goes to allowed hosts, and a hook for other error formats. Built on HttpClient and IHttpClientFactory.</Description>
+    <PackageTags>http;httpclient;ihttpclientfactory;result;error-handling;problem-details;rfc9457</PackageTags>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- A released version, not a project reference (see Sondor.Cqrs.Results). The pinned version is also the oldest one that works. -->
+    <PackageReference Include="Sondor.Results" />
+    <PackageReference Include="Microsoft.Extensions.Http" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="Sondor.Results" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Sondor.Http.Tests" />
+  </ItemGroup>
+
+</Project>

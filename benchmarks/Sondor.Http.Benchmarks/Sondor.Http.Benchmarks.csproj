@@ -1,0 +1,9 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Sondor.Http\Sondor.Http.csproj" />
+    <PackageReference Include="BenchmarkDotNet" />
+    <Using Include="Sondor.Results" />
+  </ItemGroup>
+
+</Project>

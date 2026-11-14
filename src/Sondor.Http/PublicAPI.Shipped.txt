@@ -1,0 +1,100 @@
+#nullable enable
+Sondor.Http.BearerTokenExtensions
+Sondor.Http.BearerTokenOptions
+Sondor.Http.BearerTokenOptions.AllowInsecureHttp.get -> bool
+Sondor.Http.BearerTokenOptions.AllowInsecureHttp.set -> void
+Sondor.Http.BearerTokenOptions.AllowedHosts.get -> System.Collections.Generic.ISet<string!>!
+Sondor.Http.BearerTokenOptions.BearerTokenOptions() -> void
+Sondor.Http.HttpCallOptions
+Sondor.Http.HttpCallOptions.HttpCallOptions() -> void
+Sondor.Http.HttpCallOptions.MaxResponseBytes.get -> long?
+Sondor.Http.HttpCallOptions.MaxResponseBytes.init -> void
+Sondor.Http.HttpCallOptions.Timeout.get -> System.TimeSpan?
+Sondor.Http.HttpCallOptions.Timeout.init -> void
+Sondor.Http.HttpClientExtensions
+Sondor.Http.HttpErrorContext
+Sondor.Http.HttpErrorContext.BodyTruncated.get -> bool
+Sondor.Http.HttpErrorContext.ContentHeaders.get -> System.Net.Http.Headers.HttpContentHeaders!
+Sondor.Http.HttpErrorContext.CreateError(string! code, string! description, Sondor.Results.ErrorType type, Sondor.Http.RemoteProblem? problem = null, string? traceId = null) -> Sondor.Results.Error
+Sondor.Http.HttpErrorContext.CreateFailure(Sondor.Http.RemoteProblem? problem = null, string? traceId = null) -> Sondor.Http.HttpFailure!
+Sondor.Http.HttpErrorContext.CreateStatusError() -> Sondor.Results.Error
+Sondor.Http.HttpErrorContext.Headers.get -> System.Net.Http.Headers.HttpResponseHeaders!
+Sondor.Http.HttpErrorContext.Host.get -> string!
+Sondor.Http.HttpErrorContext.Method.get -> string!
+Sondor.Http.HttpErrorContext.Options.get -> Sondor.Http.HttpResultOptions!
+Sondor.Http.HttpErrorContext.ReadBodyAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.ValueTask<System.ReadOnlyMemory<byte>>
+Sondor.Http.HttpErrorContext.ReadJsonAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.ValueTask<System.Text.Json.JsonDocument?>
+Sondor.Http.HttpErrorContext.Status.get -> int
+Sondor.Http.HttpErrorExtensions
+Sondor.Http.HttpExceptionMappings
+Sondor.Http.HttpExceptionMappings.HttpExceptionMappings() -> void
+Sondor.Http.HttpExceptionMappings.Map<TException>(System.Func<TException!, Sondor.Results.Error>! map) -> Sondor.Http.HttpExceptionMappings!
+Sondor.Http.HttpFailure
+Sondor.Http.HttpFailure.Host.get -> string!
+Sondor.Http.HttpFailure.Method.get -> string!
+Sondor.Http.HttpFailure.Problem.get -> Sondor.Http.RemoteProblem?
+Sondor.Http.HttpFailure.RetryAfter.get -> System.TimeSpan?
+Sondor.Http.HttpFailure.Status.get -> int?
+Sondor.Http.HttpFailure.TraceId.get -> string?
+Sondor.Http.HttpResultClient
+Sondor.Http.HttpResultClient.DeleteAsync(string! path, Sondor.Http.HttpCallOptions? call = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Sondor.Results.Result>!
+Sondor.Http.HttpResultClient.GetAsync<T>(string! path, Sondor.Http.HttpCallOptions? call = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Sondor.Results.Result<T>>!
+Sondor.Http.HttpResultClient.HttpResultClient(System.Net.Http.HttpClient! client, Sondor.Http.HttpResultOptions? options = null, Microsoft.Extensions.Logging.ILogger<Sondor.Http.HttpResultClient!>? logger = null, System.TimeProvider? timeProvider = null) -> void
+Sondor.Http.HttpResultClient.PatchAsync<TBody, TResponse>(string! path, TBody body, Sondor.Http.HttpCallOptions? call = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Sondor.Results.Result<TResponse>>!
+Sondor.Http.HttpResultClient.PatchAsync<TBody>(string! path, TBody body, Sondor.Http.HttpCallOptions? call = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Sondor.Results.Result>!
+Sondor.Http.HttpResultClient.PostAsync<TBody, TResponse>(string! path, TBody body, Sondor.Http.HttpCallOptions? call = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Sondor.Results.Result<TResponse>>!
+Sondor.Http.HttpResultClient.PostAsync<TBody>(string! path, TBody body, Sondor.Http.HttpCallOptions? call = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Sondor.Results.Result>!
+Sondor.Http.HttpResultClient.PutAsync<TBody, TResponse>(string! path, TBody body, Sondor.Http.HttpCallOptions? call = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Sondor.Results.Result<TResponse>>!
+Sondor.Http.HttpResultClient.PutAsync<TBody>(string! path, TBody body, Sondor.Http.HttpCallOptions? call = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Sondor.Results.Result>!
+Sondor.Http.HttpResultClient.ReadAsync(System.Net.Http.HttpResponseMessage! response, Sondor.Http.HttpCallOptions? call = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Sondor.Results.Result>!
+Sondor.Http.HttpResultClient.ReadAsync<T>(System.Net.Http.HttpResponseMessage! response, Sondor.Http.HttpCallOptions? call = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Sondor.Results.Result<T>>!
+Sondor.Http.HttpResultClient.SendAsync(System.Net.Http.HttpRequestMessage! request, Sondor.Http.HttpCallOptions? call = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Sondor.Results.Result>!
+Sondor.Http.HttpResultClient.SendAsync<T>(System.Net.Http.HttpRequestMessage! request, Sondor.Http.HttpCallOptions? call = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Sondor.Results.Result<T>>!
+Sondor.Http.HttpResultOptions
+Sondor.Http.HttpResultOptions.BaseAddress.get -> System.Uri?
+Sondor.Http.HttpResultOptions.BaseAddress.set -> void
+Sondor.Http.HttpResultOptions.CodeByStatus.get -> System.Collections.Generic.IDictionary<int, string!>!
+Sondor.Http.HttpResultOptions.ErrorCodeMember.get -> string!
+Sondor.Http.HttpResultOptions.ErrorCodeMember.set -> void
+Sondor.Http.HttpResultOptions.ErrorReaders.get -> System.Collections.Generic.IList<Sondor.Http.IHttpErrorReader!>!
+Sondor.Http.HttpResultOptions.Exceptions.get -> Sondor.Http.HttpExceptionMappings!
+Sondor.Http.HttpResultOptions.HttpResultOptions() -> void
+Sondor.Http.HttpResultOptions.Json.get -> System.Text.Json.JsonSerializerOptions!
+Sondor.Http.HttpResultOptions.Json.set -> void
+Sondor.Http.HttpResultOptions.LogCalls.get -> bool
+Sondor.Http.HttpResultOptions.LogCalls.set -> void
+Sondor.Http.HttpResultOptions.MaxErrorBodyBytes.get -> int
+Sondor.Http.HttpResultOptions.MaxErrorBodyBytes.set -> void
+Sondor.Http.HttpResultOptions.MaxRemoteDetailLength.get -> int
+Sondor.Http.HttpResultOptions.MaxRemoteDetailLength.set -> void
+Sondor.Http.HttpResultOptions.MaxResponseBytes.get -> long
+Sondor.Http.HttpResultOptions.MaxResponseBytes.set -> void
+Sondor.Http.HttpResultOptions.Timeout.get -> System.TimeSpan
+Sondor.Http.HttpResultOptions.Timeout.set -> void
+Sondor.Http.HttpResultOptions.TypeByStatus.get -> System.Collections.Generic.IDictionary<int, Sondor.Results.ErrorType>!
+Sondor.Http.HttpResultOptions.UseRemoteDetail.get -> bool
+Sondor.Http.HttpResultOptions.UseRemoteDetail.set -> void
+Sondor.Http.IAccessTokenProvider
+Sondor.Http.IAccessTokenProvider.GetTokenAsync(System.Net.Http.HttpRequestMessage! request, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.ValueTask<string?>
+Sondor.Http.IHttpErrorReader
+Sondor.Http.IHttpErrorReader.ReadAsync(Sondor.Http.HttpErrorContext! context, System.Threading.CancellationToken cancellationToken) -> System.Threading.Tasks.ValueTask<Sondor.Results.Error?>
+Sondor.Http.IHttpResultClientFactory
+Sondor.Http.IHttpResultClientFactory.CreateClient(string! name) -> Sondor.Http.HttpResultClient!
+Sondor.Http.RemoteProblem
+Sondor.Http.RemoteProblem.Detail.get -> string?
+Sondor.Http.RemoteProblem.ErrorCode.get -> string?
+Sondor.Http.RemoteProblem.Errors.get -> System.Collections.Generic.IReadOnlyDictionary<string!, System.Collections.Generic.IReadOnlyList<string!>!>!
+Sondor.Http.RemoteProblem.Instance.get -> string?
+Sondor.Http.RemoteProblem.RemoteProblem(string? type = null, string? title = null, int? status = null, string? detail = null, string? instance = null, string? errorCode = null, System.Collections.Generic.IReadOnlyDictionary<string!, System.Collections.Generic.IReadOnlyList<string!>!>? errors = null) -> void
+Sondor.Http.RemoteProblem.Status.get -> int?
+Sondor.Http.RemoteProblem.Title.get -> string?
+Sondor.Http.RemoteProblem.Type.get -> string?
+override Sondor.Http.HttpFailure.ToString() -> string!
+override Sondor.Http.RemoteProblem.ToString() -> string!
+static Sondor.Http.BearerTokenExtensions.AddSondorBearerToken(this Microsoft.Extensions.DependencyInjection.IHttpClientBuilder! builder, System.Func<System.Net.Http.HttpRequestMessage!, System.Threading.CancellationToken, System.Threading.Tasks.ValueTask<string?>>! getToken, System.Action<Sondor.Http.BearerTokenOptions!>? configure = null) -> Microsoft.Extensions.DependencyInjection.IHttpClientBuilder!
+static Sondor.Http.BearerTokenExtensions.AddSondorBearerToken<TProvider>(this Microsoft.Extensions.DependencyInjection.IHttpClientBuilder! builder, System.Action<Sondor.Http.BearerTokenOptions!>? configure = null) -> Microsoft.Extensions.DependencyInjection.IHttpClientBuilder!
+static Sondor.Http.HttpClientExtensions.AddErrorReader(this Microsoft.Extensions.DependencyInjection.IHttpClientBuilder! builder, Sondor.Http.IHttpErrorReader! reader) -> Microsoft.Extensions.DependencyInjection.IHttpClientBuilder!
+static Sondor.Http.HttpClientExtensions.AddErrorReader<TReader>(this Microsoft.Extensions.DependencyInjection.IHttpClientBuilder! builder) -> Microsoft.Extensions.DependencyInjection.IHttpClientBuilder!
+static Sondor.Http.HttpClientExtensions.AddSondorHttpClient(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, string! name, System.Action<Sondor.Http.HttpResultOptions!>? configure = null) -> Microsoft.Extensions.DependencyInjection.IHttpClientBuilder!
+static Sondor.Http.HttpClientExtensions.AddSondorHttpClient<TClient>(this Microsoft.Extensions.DependencyInjection.IServiceCollection! services, string! name, System.Action<Sondor.Http.HttpResultOptions!>? configure = null) -> Microsoft.Extensions.DependencyInjection.IHttpClientBuilder!
+static Sondor.Http.HttpErrorExtensions.GetHttpFailure(this Sondor.Results.Error error) -> Sondor.Http.HttpFailure?

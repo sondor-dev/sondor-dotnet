@@ -1,6 +1,7 @@
 <Solution>
   <Folder Name="/src/">
     <Project Path="src/Sondor.AspNetCore/Sondor.AspNetCore.csproj" />
+    <Project Path="src/Sondor.Http/Sondor.Http.csproj" />
     <Project Path="src/Sondor.Cqrs/Sondor.Cqrs.csproj" />
     <Project Path="src/Sondor.Cqrs.Results/Sondor.Cqrs.Results.csproj" />
     <Project Path="src/Sondor.Cqrs.FluentValidation/Sondor.Cqrs.FluentValidation.csproj" />
@@ -12,6 +13,7 @@
   </Folder>
   <Folder Name="/benchmarks/">
     <Project Path="benchmarks/Sondor.AspNetCore.Benchmarks/Sondor.AspNetCore.Benchmarks.csproj" />
+    <Project Path="benchmarks/Sondor.Http.Benchmarks/Sondor.Http.Benchmarks.csproj" />
     <Project Path="benchmarks/Sondor.Cqrs.Benchmarks/Sondor.Cqrs.Benchmarks.csproj" />
     <Project Path="benchmarks/Sondor.Observability.Benchmarks/Sondor.Observability.Benchmarks.csproj" />
     <Project Path="benchmarks/Sondor.Options.Benchmarks/Sondor.Options.Benchmarks.csproj" />
@@ -21,6 +23,7 @@
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/Sondor.AspNetCore.Tests/Sondor.AspNetCore.Tests.csproj" />
+    <Project Path="tests/Sondor.Http.Tests/Sondor.Http.Tests.csproj" />
     <Project Path="tests/Sondor.Cqrs.Tests/Sondor.Cqrs.Tests.csproj" />
     <Project Path="tests/Sondor.Cqrs.Results.Tests/Sondor.Cqrs.Results.Tests.csproj" />
     <Project Path="tests/Sondor.Cqrs.FluentValidation.Tests/Sondor.Cqrs.FluentValidation.Tests.csproj" />

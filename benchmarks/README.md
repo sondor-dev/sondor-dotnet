@@ -83,3 +83,14 @@ A success must cost what the framework's own result costs and allocate the same.
 read them against the cost of the request they answer: an exception costs tens of microseconds to throw, and what the package adds
 is a few hundred nanoseconds. An unknown URL is the case to watch under load (bots), which is why the classifier reads the header
 in place and allocates nothing.
+
+## Sondor.Http
+
+| Class | Measures |
+|---|---|
+| `CallBenchmarks` | One call against the same thing written by hand with `HttpClient` and `System.Net.Http.Json`, answered from memory so no socket is measured: a small success, a large success (500 orders, about 55 KB), a not found with a problem document (the hand-written version also reads the error code, which is the work this package does) and a bad gateway with an HTML page (neither reads the page). Every case runs after 0 and after 10,000 earlier calls on the same client: a cost that grows with the calls already made would show as a difference between the two. |
+
+A success must cost about what the hand-written call costs: a large body is the same read (about 1.01 times), a small one adds a few
+hundred nanoseconds and a few hundred bytes for the timeout and the bounded read. The failure paths build an error with its context
+(a template, its arguments and the failure object), so they cost a few microseconds and a few kilobytes more than a status check on
+a path that has just paid for a network round trip. Neither grows with earlier calls.
