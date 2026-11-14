@@ -2,6 +2,7 @@
   <Folder Name="/src/">
     <Project Path="src/Sondor.AspNetCore/Sondor.AspNetCore.csproj" />
     <Project Path="src/Sondor.Http/Sondor.Http.csproj" />
+    <Project Path="src/Sondor.AspNetCore.FluentValidation/Sondor.AspNetCore.FluentValidation.csproj" />
     <Project Path="src/Sondor.Cqrs/Sondor.Cqrs.csproj" />
     <Project Path="src/Sondor.Cqrs.Results/Sondor.Cqrs.Results.csproj" />
     <Project Path="src/Sondor.Cqrs.FluentValidation/Sondor.Cqrs.FluentValidation.csproj" />
@@ -24,6 +25,7 @@
   <Folder Name="/tests/">
     <Project Path="tests/Sondor.AspNetCore.Tests/Sondor.AspNetCore.Tests.csproj" />
     <Project Path="tests/Sondor.Http.Tests/Sondor.Http.Tests.csproj" />
+    <Project Path="tests/Sondor.AspNetCore.FluentValidation.Tests/Sondor.AspNetCore.FluentValidation.Tests.csproj" />
     <Project Path="tests/Sondor.Cqrs.Tests/Sondor.Cqrs.Tests.csproj" />
     <Project Path="tests/Sondor.Cqrs.Results.Tests/Sondor.Cqrs.Results.Tests.csproj" />
     <Project Path="tests/Sondor.Cqrs.FluentValidation.Tests/Sondor.Cqrs.FluentValidation.Tests.csproj" />

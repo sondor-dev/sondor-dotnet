@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <MinVerTagPrefix>aspnetcore-fluentvalidation-v</MinVerTagPrefix>
+    <Description>FluentValidation for Sondor.AspNetCore: a ValidationException is answered with a 400 problem response whose errors member lists the messages of each property, named as the API names its JSON properties.</Description>
+    <PackageTags>aspnetcore;problem-details;rfc9457;fluentvalidation;validation;errors</PackageTags>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- The shared framework: nothing to download, and no package of its own to keep patched. -->
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Released versions, not project references (see Sondor.Cqrs.Results). -->
+    <PackageReference Include="Sondor.AspNetCore" />
+    <PackageReference Include="FluentValidation" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="Sondor.Results" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="Sondor.AspNetCore.FluentValidation.Tests" />
+  </ItemGroup>
+
+</Project>
