@@ -41,7 +41,15 @@ public enum FailureKind
 /// <param name="Code">A stable code, for example <c>Validation.Failed</c>.</param>
 /// <param name="Description">What went wrong, for a person to read. Never contains a rejected value.</param>
 /// <param name="Kind">The kind of refusal.</param>
-public readonly record struct RequestFailure(string Code, string Description, FailureKind Kind);
+public readonly record struct RequestFailure(string Code, string Description, FailureKind Kind)
+{
+    /// <summary>
+    /// What went wrong for each property, when the refusal is about properties of the request: the property name as the validator
+    /// reported it (for example <c>Items[0].UnitPrice</c>) mapped to its messages, each once. Null when the refusal has no such
+    /// breakdown. Like <see cref="Description"/>, it never contains a rejected value.
+    /// </summary>
+    public IReadOnlyDictionary<string, string[]>? Errors { get; init; }
+}
 
 /// <summary>
 /// Builds a response that says "refused", so a behaviour (validation, for one) can stop a request without throwing. Register one

@@ -92,3 +92,5 @@ Sondor.Cqrs.RequestContinuation<TResponse>.RequestContinuation() -> void
 ~override Sondor.Cqrs.RequestFailure.ToString() -> string
 ~override Sondor.Cqrs.RequestOutcome.Equals(object obj) -> bool
 ~override Sondor.Cqrs.RequestOutcome.ToString() -> string
+Sondor.Cqrs.RequestFailure.Errors.get -> System.Collections.Generic.IReadOnlyDictionary<string!, string![]!>?
+Sondor.Cqrs.RequestFailure.Errors.init -> void
