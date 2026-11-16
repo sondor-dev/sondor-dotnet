@@ -226,7 +226,7 @@ public sealed class ResultSupportTests
         {
             Assert.That(result.IsFailure, Is.True);
             Assert.That(span.GetTagItem("cqrs.outcome"), Is.EqualTo("failure"));
-            Assert.That(span.GetTagItem("cqrs.error.code"), Is.EqualTo("Node.NotFound"));
+            Assert.That(span.GetTagItem("sondor.error.code"), Is.EqualTo("Node.NotFound"));
             Assert.That(span.Status, Is.EqualTo(ActivityStatusCode.Error));
         }
     }
