@@ -331,7 +331,11 @@ public sealed class HttpResultClient
 
     // The options hold the metadata once built, so this is a lookup. It throws if the options can read nothing (reflection off and no
     // resolver): that is a mistake in the setup, not a failure of a call.
+#if NET11_0_OR_GREATER
+    private JsonTypeInfo<T> TypeInfo<T>() => _options.Json.GetTypeInfo<T>();
+#else
     private JsonTypeInfo<T> TypeInfo<T>() => (JsonTypeInfo<T>)_options.Json.GetTypeInfo(typeof(T));
+#endif
 
     private CancellationTokenSource Link(HttpCallOptions? call, CancellationToken cancellationToken)
     {

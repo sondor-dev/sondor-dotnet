@@ -4,7 +4,8 @@
     Suppress an analyzer finding only in code, next to the line, with the reason; never here.
   -->
   <PropertyGroup>
-    <TargetFramework>net10.0</TargetFramework>
+    <!-- The two current .NET releases: a consumer on either gets the Microsoft packages that match its runtime. -->
+    <TargetFrameworks>net10.0;net11.0</TargetFrameworks>
     <LangVersion>latest</LangVersion>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
