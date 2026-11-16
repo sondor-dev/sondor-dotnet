@@ -35,7 +35,7 @@ public sealed class GetNodeHandler(INodeStore store) : IRequestHandler<GetNode, 
 
 | Built in | With `AddCqrsResults()` |
 |---|---|
-| Tracing | A failed result sets the span status to error, with tags `cqrs.outcome` = `failure` and `cqrs.error.code` = the error code. |
+| Tracing | A failed result sets the span status to error, with tags `cqrs.outcome` = `failure` and `sondor.error.code` = the error code. |
 | Metrics | A failed result is counted with outcome `failure`, not `success`. |
 | Logging | A failed result is logged as "Refused ... with *code*". |
 
