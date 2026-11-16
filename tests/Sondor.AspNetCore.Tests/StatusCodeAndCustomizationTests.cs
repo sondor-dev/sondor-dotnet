@@ -190,7 +190,7 @@ public sealed partial class StatusCodeAndCustomizationTests
 
         var activity = await FirstTaggedAsync(stopped);
 
-        Assert.That(activity.GetTagItem("error.type"), Is.EqualTo("Resource.NotFound"));
+        Assert.That(activity.GetTagItem("sondor.error.code"), Is.EqualTo("Resource.NotFound"));
         Assert.That(activity.Status, Is.Not.EqualTo(ActivityStatusCode.Error), "a 404 is not a failed request");
     }
 
@@ -206,7 +206,7 @@ public sealed partial class StatusCodeAndCustomizationTests
 
         var activity = await FirstTaggedAsync(stopped);
 
-        Assert.That(activity.GetTagItem("error.type"), Is.EqualTo("Error.Internal"));
+        Assert.That(activity.GetTagItem("sondor.error.code"), Is.EqualTo("Error.Internal"));
         Assert.That(activity.Status, Is.EqualTo(ActivityStatusCode.Error));
     }
 
@@ -222,7 +222,7 @@ public sealed partial class StatusCodeAndCustomizationTests
         await app.Client.GetAsync("/fail");
         await WaitAsync(() => stopped.Count > 0);
 
-        Assert.That(stopped.Any(activity => activity.GetTagItem("error.type") is not null), Is.False);
+        Assert.That(stopped.Any(activity => activity.GetTagItem("sondor.error.code") is not null), Is.False);
     }
 
     [Test]
@@ -263,9 +263,9 @@ public sealed partial class StatusCodeAndCustomizationTests
 
     private static async Task<Activity> FirstTaggedAsync(List<Activity> stopped)
     {
-        await WaitAsync(() => stopped.Any(activity => activity.GetTagItem("error.type") is not null));
+        await WaitAsync(() => stopped.Any(activity => activity.GetTagItem("sondor.error.code") is not null));
 
-        return stopped.First(activity => activity.GetTagItem("error.type") is not null);
+        return stopped.First(activity => activity.GetTagItem("sondor.error.code") is not null);
     }
 
     private static async Task WaitAsync(Func<bool> condition)

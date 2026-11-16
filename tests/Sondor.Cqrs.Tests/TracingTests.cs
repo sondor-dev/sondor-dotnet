@@ -76,8 +76,7 @@ public sealed class TracingTests
         using (Assert.EnterMultipleScope())
         {
             Assert.That(span.GetTagItem("cqrs.outcome"), Is.EqualTo("failure"));
-            Assert.That(span.GetTagItem("cqrs.error.code"), Is.EqualTo("Check.Failed"));
-            Assert.That(span.GetTagItem("error.type"), Is.EqualTo("Check.Failed"));
+            Assert.That(span.GetTagItem("sondor.error.code"), Is.EqualTo("Check.Failed"));
             Assert.That(span.Status, Is.EqualTo(ActivityStatusCode.Error));
             Assert.That(span.StatusDescription, Is.EqualTo("Check.Failed"));
         }
@@ -104,7 +103,6 @@ public sealed class TracingTests
         using (Assert.EnterMultipleScope())
         {
             Assert.That(span.GetTagItem("cqrs.outcome"), Is.EqualTo("error"));
-            Assert.That(span.GetTagItem("error.type"), Is.EqualTo(typeof(InvalidOperationException).FullName));
             Assert.That(span.Status, Is.EqualTo(ActivityStatusCode.Error));
             Assert.That(span.Events.Select(@event => @event.Name), Does.Contain("exception"));
         }
