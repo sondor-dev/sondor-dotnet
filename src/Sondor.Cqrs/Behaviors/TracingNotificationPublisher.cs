@@ -35,7 +35,6 @@ internal sealed class TracingNotificationPublisher(INotificationPublisher inner)
         }
         catch (Exception exception) when (exception is not OperationCanceledException || !cancellationToken.IsCancellationRequested)
         {
-            activity.SetTag(Diagnostics.ErrorTypeTag, exception.GetType().FullName);
             activity.AddException(exception);
             activity.SetStatus(ActivityStatusCode.Error, exception.GetType().Name);
             throw;
@@ -55,7 +54,6 @@ internal sealed class TracingNotificationPublisher(INotificationPublisher inner)
             }
             catch (Exception exception) when (activity is not null && (exception is not OperationCanceledException || !cancellationToken.IsCancellationRequested))
             {
-                activity.SetTag(Diagnostics.ErrorTypeTag, exception.GetType().FullName);
                 activity.AddException(exception);
                 activity.SetStatus(ActivityStatusCode.Error, exception.GetType().Name);
                 throw;

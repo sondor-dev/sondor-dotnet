@@ -43,7 +43,6 @@ internal sealed class TracingBehavior<TRequest, TResponse>(IOutcomeReader<TRespo
             {
                 activity.SetTag(Diagnostics.OutcomeTag, Diagnostics.Failure);
                 activity.SetTag(Diagnostics.ErrorCodeTag, outcome.ErrorCode);
-                activity.SetTag(Diagnostics.ErrorTypeTag, outcome.ErrorCode ?? Diagnostics.Failure);
                 activity.SetStatus(ActivityStatusCode.Error, outcome.ErrorCode);
             }
 
@@ -57,7 +56,6 @@ internal sealed class TracingBehavior<TRequest, TResponse>(IOutcomeReader<TRespo
         catch (Exception exception)
         {
             activity.SetTag(Diagnostics.OutcomeTag, Diagnostics.Error);
-            activity.SetTag(Diagnostics.ErrorTypeTag, exception.GetType().FullName);
             activity.AddException(exception);
             activity.SetStatus(ActivityStatusCode.Error, exception.GetType().Name);
             throw;

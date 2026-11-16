@@ -147,7 +147,7 @@ exported copy only.
 
 ## Notes
 
-- Needs `net10.0`. Depends on the OpenTelemetry SDK (`OpenTelemetry.Extensions.Hosting`, the OTLP exporter) and `Sondor.Options`.
+- Needs `net10.0` or `net11.0`. Depends on the OpenTelemetry SDK (`OpenTelemetry.Extensions.Hosting`, the OTLP exporter) and `Sondor.Options`.
 - Modes, the sampling ratio and excluded sources read the live configuration. The exporter's endpoint, protocol and headers
   are fixed when the host starts.
 - With `Metrics:Mode` set to `Off`, metrics are still collected in process; only the export is skipped.

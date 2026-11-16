@@ -83,7 +83,7 @@ services.AddCqrs(cqrs =>
 
 | Built in | What it records |
 |---|---|
-| `UseTracing()` | A span for each request, and for each notification and its handlers. Source `Sondor.Cqrs`; tags `cqrs.request`, `cqrs.request.kind` (command, query, request, notification), `cqrs.handler`, `cqrs.outcome`, `cqrs.error.code`. Exceptions are recorded on the span. |
+| `UseTracing()` | A span for each request, and for each notification and its handlers. Source `Sondor.Cqrs`; tags `cqrs.request`, `cqrs.request.kind` (command, query, request, notification), `cqrs.handler`, `cqrs.outcome`, `sondor.error.code`. Exceptions are recorded on the span. |
 | `UseMetrics()` | Meter `Sondor.Cqrs`: a counter `cqrs.requests` and a histogram `cqrs.request.duration` (seconds), tagged by request, kind and outcome (`success`, `failure`, `error`, `cancelled`). |
 | `UseLogging()` | One line per request: its kind and name, how long it took, how it ended. **Never the request itself**, which can hold a secret. A slow request is a warning. |
 

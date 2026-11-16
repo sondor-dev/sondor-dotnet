@@ -10,8 +10,7 @@ internal static class Diagnostics
     public const string RequestTag = "cqrs.request";
     public const string KindTag = "cqrs.request.kind";
     public const string OutcomeTag = "cqrs.outcome";
-    public const string ErrorCodeTag = "cqrs.error.code";
-    public const string ErrorTypeTag = "error.type";
+    public const string ErrorCodeTag = "sondor.error.code";
 
     public const string Success = "success";
     public const string Failure = "failure";

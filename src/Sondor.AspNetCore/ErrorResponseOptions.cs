@@ -87,7 +87,7 @@ public sealed class ErrorResponseOptions
     public bool BareTraceId { get; set; }
 
     /// <summary>
-    /// Tag the request's <see cref="System.Diagnostics.Activity"/> with <c>error.type</c> (the error code) when a problem is written,
+    /// Tag the request's <see cref="System.Diagnostics.Activity"/> with <c>sondor.error.code</c> (the error code) when a problem is written,
     /// and mark it as failed from status 500 up. On by default.
     /// </summary>
     public bool TagActivity { get; set; } = true;

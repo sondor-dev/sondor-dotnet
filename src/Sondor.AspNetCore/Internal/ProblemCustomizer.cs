@@ -59,7 +59,7 @@ internal static class ProblemCustomizer
 
         if (settings.TagActivity && activity is not null)
         {
-            activity.SetTag("error.type", problem.Extensions[settings.ErrorCodeMember]);
+            activity.SetTag("sondor.error.code", problem.Extensions[settings.ErrorCodeMember]);
 
             if (status >= StatusCodes.Status500InternalServerError)
             {

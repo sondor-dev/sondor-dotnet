@@ -118,7 +118,7 @@ They can also be bound from configuration: `services.Configure<ErrorResponseOpti
 | `WriteStatusCodeBodies` | `true` | Give a bare error status a problem body. |
 | `IncludeExceptionDetails` | `false` | Put an unexpected exception's message in `detail`. For development only. |
 | `BareTraceId` | `false` | Use the trace id alone as `traceId` (handy to paste into a trace viewer) instead of the framework's full `traceparent`. |
-| `TagActivity` | `true` | Tag the request's `Activity` with `error.type`, and mark it failed from 500 up. |
+| `TagActivity` | `true` | Tag the request's `Activity` with `sondor.error.code` (not `error.type`, which ASP.NET Core sets itself from .NET 11), and mark it failed from 500 up. |
 | `ClientClosedRequestStatus` | `499` | The status when the caller disconnected before the answer. Never logged as an error. |
 | `AppliesTo` | API requests only | Which requests get a problem response (see [Pages and views](#pages-and-views)). |
 

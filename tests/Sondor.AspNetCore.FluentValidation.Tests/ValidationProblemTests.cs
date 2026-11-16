@@ -232,8 +232,12 @@ public sealed class ValidationProblemTests
     private static string[] Messages(JsonElement errors, string property) =>
         [.. errors.GetProperty(property).EnumerateArray().Select(message => message.GetString()!)];
 
-    private static async Task<JsonElement> ReadAsync(HttpResponseMessage response) =>
-        JsonDocument.Parse(await response.Content.ReadAsStringAsync()).RootElement.Clone();
+    private static async Task<JsonElement> ReadAsync(HttpResponseMessage response)
+    {
+        using var document = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
+
+        return document.RootElement.Clone();
+    }
 
     private static async Task<TestApp> StartAsync(
         Action<ErrorResponseOptions>? configure = null,
